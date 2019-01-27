@@ -48,7 +48,7 @@ class Connector extends EventEmitter implements ConnectorInterface
         $transfer->init($this->session);
         $transfer->on('established', function (PromiseTransferInterface $transfer, SessionInterface $session) {
 
-            if (!$this->session->is('PROTO-CONN')) {
+            if (!$session->is('PROTO-CONN')) {
 
                 // Initial the ProtoConnection
                 $protoConn = new ProtoConnection();
@@ -57,10 +57,10 @@ class Connector extends EventEmitter implements ConnectorInterface
                 $this->emit('connection', [$protoConn]);
 
                 // Add to the session
-                $this->session->set('PROTO-CONN', $protoConn);
+                $session->set('PROTO-CONN', $protoConn);
 
             } else
-                $protoConn = $this->session->get('PROTO-CONN');
+                $protoConn = $session->get('PROTO-CONN');
 
             // Setup the connection in new transfer
             $protoConn->setup($transfer, $session);
