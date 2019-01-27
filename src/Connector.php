@@ -52,6 +52,7 @@ class Connector extends EventEmitter implements ConnectorInterface
 
                 // Initial the ProtoConnection
                 $protoConn = new ProtoConnection();
+                $protoConn->setup($transfer, $session);
 
                 // Emit the connection
                 $this->emit('connection', [$protoConn]);
@@ -59,11 +60,10 @@ class Connector extends EventEmitter implements ConnectorInterface
                 // Add to the session
                 $session->set('PROTO-CONN', $protoConn);
 
-            } else
+            } else {
                 $protoConn = $session->get('PROTO-CONN');
-
-            // Setup the connection in new transfer
-            $protoConn->setup($transfer, $session);
+                $protoConn->setup($transfer, $session);
+            }
 
         });
     }
