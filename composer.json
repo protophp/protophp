@@ -1,0 +1,34 @@
+{
+  "name": "protophp/protophp",
+  "description": "ProtoPHP is an asynchronous binary protocol for inter-service communication in PHP applications.",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Arash Ghamkhari",
+      "email": "dev@ghamkhari.com"
+    }
+  ],
+  "require": {
+    "opt/opt": "^1.0",
+    "protophp/pack": "^0.3",
+    "protophp/session": "^1.0",
+    "protophp/promise-transfer": "^0.1",
+    "react/socket": "^1.0",
+    "monolog/monolog": "^1.0",
+    "evenement/evenement": "^3.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Proto\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Proto\\Tests\\": "tests"
+    }
+  }
+}
