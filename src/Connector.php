@@ -3,6 +3,7 @@
 namespace Proto;
 
 use Evenement\EventEmitter;
+use Opt\OptTrait;
 use Proto\PromiseTransfer\PromiseTransfer;
 use Proto\PromiseTransfer\PromiseTransferInterface;
 use Proto\Session\SessionInterface;
@@ -12,6 +13,8 @@ use React\Socket\ConnectionInterface;
 
 class Connector extends EventEmitter implements ConnectorInterface
 {
+    use OptTrait;
+
     /**
      * @var SessionManagerInterface
      */

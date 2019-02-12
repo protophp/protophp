@@ -3,6 +3,7 @@
 namespace Proto;
 
 use Evenement\EventEmitter;
+use Opt\OptTrait;
 use Proto\PromiseTransfer\PromiseTransfer;
 use Proto\PromiseTransfer\PromiseTransferInterface;
 use Proto\Session\SessionInterface;
@@ -13,6 +14,8 @@ use React\Socket\Server;
 
 class Listener extends EventEmitter implements ListenerInterface
 {
+    use OptTrait;
+
     /**
      * @var SessionManagerInterface
      */
