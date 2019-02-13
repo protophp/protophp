@@ -52,7 +52,7 @@ class Connector extends EventEmitter implements ConnectorInterfaceProto
             ->setOpt(self::DISALLOW_DIRECT_INVOKE, true)
             ->setOpt(self::MAP_INVOKE, []);
 
-        $this->connector = new \React\Socket\Connector($loop, $options);
+        $this->connector = new \React\Socket\Connector($loop, []);
     }
 
     public function send($data, callable $onResponse = null, callable $onDelivery = null)
