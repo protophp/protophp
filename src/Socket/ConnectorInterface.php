@@ -9,7 +9,7 @@ use Proto\Session\SessionManagerInterface;
 use React\EventLoop\LoopInterface;
 use React\Promise\Promise;
 
-interface ConnectorInterfaceProto extends EventEmitterInterface, ProtoOpt
+interface ConnectorInterface extends EventEmitterInterface, ProtoOpt
 {
     /**
      * ConnectorInterface constructor.

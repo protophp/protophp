@@ -13,7 +13,7 @@ use React\Promise\Deferred;
 use React\Promise\Promise;
 use React\Socket\ConnectionInterface;
 
-class Connector extends EventEmitter implements ConnectorInterfaceProto
+class Connector extends EventEmitter implements ConnectorInterface
 {
     use OptTrait;
 
