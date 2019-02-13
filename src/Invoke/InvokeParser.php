@@ -17,11 +17,10 @@ class InvokeParser implements InvokeParserInterface
     {
         $invoke = $pack->getData();
 
-        if (!is_array($invoke) || !isset($invoke[0]) || !isset($invoke[1]))
+        if (!is_array($invoke) || !isset($invoke[0]) || !isset($invoke[1]) || !is_array($invoke[1]))
             throw new InvokeException(null, InvokeException::ERR_INVALID_INVOKE);
 
-        list($call, $params) = $invoke;
-        $this->params = $params;
+        list($call, $this->params) = $invoke;
 
         // Parse call from map
         if (is_string($call) && strpos($call, '::') === false) {
