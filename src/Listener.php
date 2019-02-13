@@ -29,6 +29,12 @@ class Listener extends EventEmitter implements ListenerInterface
     public function __construct($uri, LoopInterface $loop, SessionManagerInterface $sessionManager, array $context = array())
     {
         $this->sessionManager = $sessionManager;
+
+        // Defaults options
+        $this
+            ->setOpt(self::OPT_DISALLOW_DIRECT_INVOKE, true)
+            ->setOpt(self::OPT_MAP_INVOKE, []);
+
         $this->server = new Server($uri, $loop, $context);
         $this->server->on('connection', function (ConnectionInterface $conn) {
 
@@ -52,7 +58,7 @@ class Listener extends EventEmitter implements ListenerInterface
                     $protoConn = $session->get('PROTO-CONN');
 
                 // Setup the connection in new transfer
-                $protoConn->setup($transfer, $session);
+                $protoConn->setup($transfer, $session, $this);
 
             });
 
