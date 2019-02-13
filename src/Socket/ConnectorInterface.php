@@ -21,9 +21,9 @@ interface ConnectorInterface extends EventEmitterInterface, ProtoOpt
      */
     public function __construct(string $uri, LoopInterface $loop, SessionManagerInterface $sessionManager, string $sessionKey = null);
 
-    public function send($data, callable $onResponse = null, callable $onDelivery = null);
+    public function send($data, callable $onResponse = null, callable $onDelivery = null): ConnectorInterface;
 
     public function invoke($call, $params = []): Promise;
 
-    public function connect();
+    public function connect(): ConnectorInterface;
 }

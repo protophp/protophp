@@ -55,12 +55,14 @@ class Connector extends EventEmitter implements ConnectorInterface
         $this->connector = new \React\Socket\Connector($loop, []);
     }
 
-    public function send($data, callable $onResponse = null, callable $onDelivery = null)
+    public function send($data, callable $onResponse = null, callable $onDelivery = null): ConnectorInterface
     {
         if (isset($this->protoConn))
             $this->protoConn->send($data, $onResponse, $onDelivery);
         else
             $this->dataQueue[] = [$data, $onResponse, $onDelivery];
+
+        return $this;
     }
 
     public function invoke($call, $params = []): Promise
@@ -74,7 +76,7 @@ class Connector extends EventEmitter implements ConnectorInterface
         }
     }
 
-    public function connect()
+    public function connect(): ConnectorInterface
     {
         $this->connector->connect($this->uri)
             ->then(function (ConnectionInterface $conn) {
@@ -128,5 +130,7 @@ class Connector extends EventEmitter implements ConnectorInterface
             ->otherwise(function (\Exception $e) {
                 $this->emit('error', [$e]);
             });
+
+        return $this;
     }
 }
