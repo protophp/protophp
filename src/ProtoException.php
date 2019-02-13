@@ -2,7 +2,7 @@
 
 namespace Proto;
 
-class ProtoException implements \Throwable
+class ProtoException
 {
     private $name;
     private $message;
@@ -28,26 +28,6 @@ class ProtoException implements \Throwable
     public function getCode()
     {
         return $this->code;
-    }
-
-    public function getFile()
-    {
-    }
-
-    public function getLine()
-    {
-    }
-
-    public function getTrace()
-    {
-    }
-
-    public function getTraceAsString()
-    {
-    }
-
-    public function getPrevious()
-    {
     }
 
     public function __toString()

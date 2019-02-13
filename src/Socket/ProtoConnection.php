@@ -34,12 +34,14 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
 
     public function send($data, callable $onResponse = null, callable $onDelivery = null)
     {
-        // Security (Remove traces from exceptions)
-        if ($data instanceof \Throwable)
-            $data = new ProtoException(get_class($data), $data->getMessage(), $data->getCode());
+        if (!$data instanceof PackInterface) {
 
-        if (!$data instanceof PackInterface)
+            // Security (Remove traces from exceptions)
+            if ($data instanceof \Throwable)
+                $data = new ProtoException(get_class($data), $data->getMessage(), $data->getCode());
+
             $data = (new Pack())->setData($data);
+        }
 
         $data->setHeaderByKey(1, self::PROTO_DATA);
         $this->transfer->send($data, $onResponse, $onDelivery);
@@ -54,7 +56,7 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
         $this->transfer->send($pack, function (PackInterface $pack) use ($deferred) {
             $return = $pack->getData();
 
-            if ($return instanceof \Throwable)
+            if ($return instanceof ProtoException)
                 $deferred->reject($return);
             else
                 $deferred->resolve($return);

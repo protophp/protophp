@@ -54,12 +54,14 @@ class Data implements DataInterface
         if ($this->isResponseSent)
             return false;
 
-        // Security (Remove traces from exceptions)
-        if ($data instanceof \Throwable)
-            $data = new ProtoException(get_class($data), $data->getMessage(), $data->getCode());
+        if (!$data instanceof PackInterface) {
 
-        if (!$data instanceof PackInterface)
+            // Security (Remove traces from exceptions)
+            if ($data instanceof \Throwable)
+                $data = new ProtoException(get_class($data), $data->getMessage(), $data->getCode());
+
             $data = (new Pack())->setData($data);
+        }
 
         $this->transfer->response($data, $this->parser->getId(), $onDelivery);
         $this->isResponseSent = true;
