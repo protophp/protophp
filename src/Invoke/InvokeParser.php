@@ -3,6 +3,7 @@
 namespace Proto\Invoke;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use Opt\OptInterface;
 use Proto\OptConnectionInterface;
 use Proto\Pack\PackInterface;
 use ReflectionClass;
@@ -13,7 +14,7 @@ class InvokeParser implements InvokeParserInterface
     private $method;
     private $params;
 
-    public function __construct(PackInterface $pack, OptConnectionInterface $opt)
+    public function __construct(PackInterface $pack, OptInterface $opt)
     {
         $invoke = $pack->getData();
 

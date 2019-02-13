@@ -2,7 +2,7 @@
 
 namespace Proto\Invoke;
 
-use Proto\OptConnectionInterface;
+use Opt\OptInterface;
 use Proto\Pack\PackInterface;
 
 interface InvokeParserInterface
@@ -10,10 +10,10 @@ interface InvokeParserInterface
     /**
      * InvokeParserInterface constructor.
      * @param PackInterface $pack
-     * @param OptConnectionInterface $opt
+     * @param OptInterface $opt
      * @throws InvokeException
      */
-    public function __construct(PackInterface $pack, OptConnectionInterface $opt);
+    public function __construct(PackInterface $pack, OptInterface $opt);
 
     public function getClass(): string;
 
