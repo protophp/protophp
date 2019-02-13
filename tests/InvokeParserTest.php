@@ -9,7 +9,7 @@ use Opt\OptTrait;
 use PHPUnit\Framework\TestCase;
 use Proto\Invoke\InvokeException;
 use Proto\Invoke\InvokeParser;
-use Proto\OptConnectionInterface;
+use Proto\ProtoOpt;
 use Proto\Pack\Pack;
 
 /**
@@ -25,8 +25,8 @@ class InvokeParserTest extends TestCase implements OptInterface
 
         // Defaults options
         $this
-            ->setOpt(OptConnectionInterface::OPT_DISALLOW_DIRECT_INVOKE, true)
-            ->setOpt(OptConnectionInterface::OPT_MAP_INVOKE, []);
+            ->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, true)
+            ->setOpt(ProtoOpt::MAP_INVOKE, []);
 
         /**
          * @var ClassLoader $loader
@@ -66,7 +66,7 @@ class InvokeParserTest extends TestCase implements OptInterface
         $params = [];
         $pack = (new Pack())->setData([$call, $params]);
 
-        $this->setOpt(OptConnectionInterface::OPT_DISALLOW_DIRECT_INVOKE, false);
+        $this->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, false);
 
         try {
             $parser = new InvokeParser($pack, $this);
@@ -100,7 +100,7 @@ class InvokeParserTest extends TestCase implements OptInterface
         $params = [];
         $pack = (new Pack())->setData([$call, $params]);
 
-        $this->setOpt(OptConnectionInterface::OPT_DISALLOW_DIRECT_INVOKE, false);
+        $this->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, false);
 
         try {
             $parser = new InvokeParser($pack, $this);
@@ -130,7 +130,7 @@ class InvokeParserTest extends TestCase implements OptInterface
 
     public function testMapToStringCall()
     {
-        $this->setOpt(OptConnectionInterface::OPT_MAP_INVOKE, [
+        $this->setOpt(ProtoOpt::MAP_INVOKE, [
             'TEST' => '\Proto\Tests\InvokeParserTest::method'
         ]);
 
@@ -138,7 +138,7 @@ class InvokeParserTest extends TestCase implements OptInterface
         $params = [];
         $pack = (new Pack())->setData([$call, $params]);
 
-        $this->setOpt(OptConnectionInterface::OPT_DISALLOW_DIRECT_INVOKE, false);
+        $this->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, false);
 
         try {
             $parser = new InvokeParser($pack, $this);
@@ -153,7 +153,7 @@ class InvokeParserTest extends TestCase implements OptInterface
 
     public function testMapToArrayCall()
     {
-        $this->setOpt(OptConnectionInterface::OPT_MAP_INVOKE, [
+        $this->setOpt(ProtoOpt::MAP_INVOKE, [
             'TEST' => ['\Proto\Tests\InvokeParserTest', 'method']
         ]);
 
@@ -161,7 +161,7 @@ class InvokeParserTest extends TestCase implements OptInterface
         $params = [];
         $pack = (new Pack())->setData([$call, $params]);
 
-        $this->setOpt(OptConnectionInterface::OPT_DISALLOW_DIRECT_INVOKE, false);
+        $this->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, false);
 
         try {
             $parser = new InvokeParser($pack, $this);
@@ -176,7 +176,7 @@ class InvokeParserTest extends TestCase implements OptInterface
 
     public function testInvalidInvokes()
     {
-        $this->setOpt(OptConnectionInterface::OPT_DISALLOW_DIRECT_INVOKE, false);
+        $this->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, false);
 
         $call = 1;
         $params = [];
@@ -233,7 +233,7 @@ class InvokeParserTest extends TestCase implements OptInterface
 
     public function testValidNumberOfRequiredParameters()
     {
-        $this->setOpt(OptConnectionInterface::OPT_DISALLOW_DIRECT_INVOKE, false);
+        $this->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, false);
 
         // All parameters passed
         $call = '\Proto\Tests\InvokeParserTest::methodWithParams';
@@ -269,7 +269,7 @@ class InvokeParserTest extends TestCase implements OptInterface
 
     public function testInvalidNumberOfRequiredParameters()
     {
-        $this->setOpt(OptConnectionInterface::OPT_DISALLOW_DIRECT_INVOKE, false);
+        $this->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, false);
 
         $call = '\Proto\Tests\InvokeParserTest::methodWithParams';
         $params = [1];

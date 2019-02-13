@@ -4,7 +4,7 @@ namespace Proto\Invoke;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Opt\OptInterface;
-use Proto\OptConnectionInterface;
+use Proto\ProtoOpt;
 use Proto\Pack\PackInterface;
 use ReflectionClass;
 
@@ -26,7 +26,7 @@ class InvokeParser implements InvokeParserInterface
         // Parse call from map
         if (is_string($call) && strpos($call, '::') === false) {
 
-            $map = (array)$opt->getOpt(OptConnectionInterface::OPT_MAP_INVOKE);
+            $map = (array)$opt->getOpt(ProtoOpt::MAP_INVOKE);
             if (!isset($map[$call]))
                 throw new InvokeException(null, InvokeException::ERR_INVALID_INVOKE);
 
@@ -35,7 +35,7 @@ class InvokeParser implements InvokeParserInterface
         }
 
         // Disallow direct invoke
-        if ($opt->getOpt(OptConnectionInterface::OPT_DISALLOW_DIRECT_INVOKE))
+        if ($opt->getOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE))
             throw new InvokeException(null, InvokeException::ERR_OPERATION_NOT_PERMITTED);
 
         $this->parse($call);

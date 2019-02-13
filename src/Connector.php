@@ -13,7 +13,7 @@ use React\Promise\Deferred;
 use React\Promise\Promise;
 use React\Socket\ConnectionInterface;
 
-class Connector extends EventEmitter implements ConnectorInterface
+class Connector extends EventEmitter implements ConnectorInterfaceProto
 {
     use OptTrait;
 
@@ -49,8 +49,8 @@ class Connector extends EventEmitter implements ConnectorInterface
 
         // Defaults options
         $this
-            ->setOpt(self::OPT_DISALLOW_DIRECT_INVOKE, true)
-            ->setOpt(self::OPT_MAP_INVOKE, []);
+            ->setOpt(self::DISALLOW_DIRECT_INVOKE, true)
+            ->setOpt(self::MAP_INVOKE, []);
 
         $this->connector = new \React\Socket\Connector($loop, $options);
     }

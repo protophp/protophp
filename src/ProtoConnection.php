@@ -26,7 +26,7 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
     private $session;
 
     /**
-     * @var OptConnectionInterface
+     * @var ProtoOpt
      */
     private $opt;
 
@@ -57,7 +57,7 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
         return $deferred->promise();
     }
 
-    public function setup(PromiseTransferInterface $transfer, SessionInterface $session, OptConnectionInterface $opt): ProtoConnectionInterface
+    public function setup(PromiseTransferInterface $transfer, SessionInterface $session, ProtoOpt $opt): ProtoConnectionInterface
     {
         $this->transfer = $transfer;
         $this->session = $session;

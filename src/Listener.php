@@ -12,7 +12,7 @@ use React\EventLoop\LoopInterface;
 use React\Socket\ConnectionInterface;
 use React\Socket\Server;
 
-class Listener extends EventEmitter implements ListenerInterface
+class Listener extends EventEmitter implements ListenerInterfaceProto
 {
     use OptTrait;
 
@@ -32,8 +32,8 @@ class Listener extends EventEmitter implements ListenerInterface
 
         // Defaults options
         $this
-            ->setOpt(self::OPT_DISALLOW_DIRECT_INVOKE, true)
-            ->setOpt(self::OPT_MAP_INVOKE, []);
+            ->setOpt(self::DISALLOW_DIRECT_INVOKE, true)
+            ->setOpt(self::MAP_INVOKE, []);
 
         $this->server = new Server($uri, $loop, $context);
         $this->server->on('connection', function (ConnectionInterface $conn) {
