@@ -16,7 +16,8 @@
     "protophp/promise-transfer": "^0.1",
     "react/socket": "^1.0",
     "monolog/monolog": "^1.0",
-    "evenement/evenement": "^3.0"
+    "evenement/evenement": "^3.0",
+    "doctrine/annotations": "1.6"
   },
   "require-dev": {
     "phpunit/phpunit": "^7.0"
