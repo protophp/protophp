@@ -26,7 +26,7 @@ class Listener extends EventEmitter implements ListenerInterfaceProto
      */
     private $server;
 
-    public function __construct($uri, LoopInterface $loop, SessionManagerInterface $sessionManager, array $context = array())
+    public function __construct($uri, LoopInterface $loop, SessionManagerInterface $sessionManager)
     {
         $this->sessionManager = $sessionManager;
 
@@ -35,7 +35,7 @@ class Listener extends EventEmitter implements ListenerInterfaceProto
             ->setOpt(self::DISALLOW_DIRECT_INVOKE, true)
             ->setOpt(self::MAP_INVOKE, []);
 
-        $this->server = new Server($uri, $loop, $context);
+        $this->server = new Server($uri, $loop, []);
         $this->server->on('connection', function (ConnectionInterface $conn) {
 
             $transfer = new PromiseTransfer($conn, $this->sessionManager);

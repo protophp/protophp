@@ -17,10 +17,9 @@ interface ConnectorInterfaceProto extends EventEmitterInterface, ProtoOpt
      * @param LoopInterface $loop
      * @param SessionManagerInterface $sessionManager
      * @param string|null $sessionKey
-     * @param array $options
      * @throws SessionException
      */
-    public function __construct(string $uri, LoopInterface $loop, SessionManagerInterface $sessionManager, string $sessionKey = null, array $options = array());
+    public function __construct(string $uri, LoopInterface $loop, SessionManagerInterface $sessionManager, string $sessionKey = null);
 
     public function send($data, callable $onResponse = null, callable $onDelivery = null);
 

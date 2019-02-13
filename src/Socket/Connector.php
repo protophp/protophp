@@ -41,7 +41,7 @@ class Connector extends EventEmitter implements ConnectorInterfaceProto
     private $invokeQueue = [];
     private $uri;
 
-    public function __construct(string $uri, LoopInterface $loop, SessionManagerInterface $sessionManager, string $sessionKey = null, array $options = array())
+    public function __construct(string $uri, LoopInterface $loop, SessionManagerInterface $sessionManager, string $sessionKey = null)
     {
         $this->uri = $uri;
         $this->sessionManager = $sessionManager;
