@@ -2,8 +2,6 @@
 
 namespace Proto\Tests;
 
-use Composer\Autoload\ClassLoader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Opt\OptInterface;
 use Opt\OptTrait;
 use PHPUnit\Framework\TestCase;
