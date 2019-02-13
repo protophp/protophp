@@ -110,7 +110,7 @@ class Connector extends EventEmitter implements ConnectorInterface
                         $this->protoConn->send($params[0], $params[1], $params[2]);
 
                     foreach ($this->invokeQueue as $invoke)
-                        $this->protoConn->invoke($invoke[0], $invoke[1], $invoke[3]);
+                        $this->protoConn->invoke($invoke[0], $invoke[1], $invoke[2]);
 
                     // Clear queue
                     $this->dataQueue = [];
