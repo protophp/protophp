@@ -78,18 +78,22 @@ class InvokeParser implements InvokeParserInterface
 
         try {
             $reflectionClass = new ReflectionClass($this->class);
-            $classRPC = (new AnnotationReader())->getClassAnnotation($reflectionClass, 'RPC');
+            $classRPC = (new AnnotationReader())->getClassAnnotation($reflectionClass, 'Proto\RPC');
             if (!$classRPC)
                 throw new InvokeException(null, InvokeException::ERR_OPERATION_NOT_PERMITTED);
 
             $reflectionMethod = $reflectionClass->getMethod($this->method);
-            $methodRPC = (new AnnotationReader())->getMethodAnnotation($reflectionMethod, 'RPC');
+            $methodRPC = (new AnnotationReader())->getMethodAnnotation($reflectionMethod, 'Proto\RPC');
             if (!$methodRPC)
                 throw new InvokeException(null, InvokeException::ERR_OPERATION_NOT_PERMITTED);
 
         } catch (\Exception $e) {
-            throw new InvokeException(null, InvokeException::ERR_UNKNOWN);
+            throw new InvokeException(null, InvokeException::ERR_OPERATION_NOT_PERMITTED);
         }
+
+        // required params
+        if ($reflectionMethod->getNumberOfRequiredParameters() > count($this->params))
+            throw new InvokeException(null, InvokeException::ERR_INVALID_PARAMS);
     }
 
     /**
