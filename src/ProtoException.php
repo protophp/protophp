@@ -22,12 +22,12 @@ class ProtoException implements \Throwable
 
     public function getMessage()
     {
-
+        return $this->message;
     }
 
     public function getCode()
     {
-
+        return $this->code;
     }
 
     public function getFile()
