@@ -25,6 +25,11 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
      */
     private $session;
 
+    /**
+     * @var OptConnectionInterface
+     */
+    private $opt;
+
     public function send($data, callable $onResponse = null, callable $onDelivery = null)
     {
         if (!$data instanceof PackInterface)
@@ -52,10 +57,11 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
         return $deferred->promise();
     }
 
-    public function setup(PromiseTransferInterface $transfer, SessionInterface $session): ProtoConnectionInterface
+    public function setup(PromiseTransferInterface $transfer, SessionInterface $session, OptConnectionInterface $opt): ProtoConnectionInterface
     {
         $this->transfer = $transfer;
         $this->session = $session;
+        $this->opt = $opt;
 
         $this->transfer->on('data', function (PackInterface $pack, ParserInterface $parser) {
             $data = new Data($pack, $parser, $this->transfer);
@@ -68,7 +74,7 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
                 case self::PROTO_RPC:
 
                     try {
-                        $parser = new InvokeParser($pack);
+                        $parser = new InvokeParser($pack, $this->opt);
                     } catch (InvokeException $e) {
                         // Exception response
                         $data->response($e);
