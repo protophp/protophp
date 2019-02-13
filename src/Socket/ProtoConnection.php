@@ -9,6 +9,7 @@ use Proto\Pack\Pack;
 use Proto\Pack\PackInterface;
 use Proto\PromiseTransfer\ParserInterface;
 use Proto\PromiseTransfer\PromiseTransferInterface;
+use Proto\ProtoException;
 use Proto\ProtoOpt;
 use Proto\Session\SessionInterface;
 use React\Promise\Deferred;
@@ -33,6 +34,10 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
 
     public function send($data, callable $onResponse = null, callable $onDelivery = null)
     {
+        // Security (Remove traces from exceptions)
+        if ($data instanceof \Throwable)
+            $data = new ProtoException(get_class($data), $data->getMessage(), $data->getCode());
+
         if (!$data instanceof PackInterface)
             $data = (new Pack())->setData($data);
 

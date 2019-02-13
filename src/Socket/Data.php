@@ -6,6 +6,7 @@ use Proto\Pack\Pack;
 use Proto\Pack\PackInterface;
 use Proto\PromiseTransfer\ParserInterface;
 use Proto\PromiseTransfer\PromiseTransferInterface;
+use Proto\ProtoException;
 
 class Data implements DataInterface
 {
@@ -52,6 +53,10 @@ class Data implements DataInterface
     {
         if ($this->isResponseSent)
             return false;
+
+        // Security (Remove traces from exceptions)
+        if ($data instanceof \Throwable)
+            $data = new ProtoException(get_class($data), $data->getMessage(), $data->getCode());
 
         if (!$data instanceof PackInterface)
             $data = (new Pack())->setData($data);
