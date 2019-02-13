@@ -7,7 +7,7 @@ use Proto\Session\SessionManagerInterface;
 use React\EventLoop\LoopInterface;
 use React\Promise\Promise;
 
-interface ConnectorInterface extends EventEmitterInterface
+interface ConnectorInterface extends EventEmitterInterface, OptConnectionInterface
 {
     public function __construct(string $uri, LoopInterface $loop, SessionManagerInterface $sessionManager, string $sessionKey = null, array $options = array());
 
