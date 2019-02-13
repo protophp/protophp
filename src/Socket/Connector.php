@@ -1,6 +1,6 @@
 <?php
 
-namespace Proto;
+namespace Proto\Socket;
 
 use Evenement\EventEmitter;
 use Opt\OptTrait;
@@ -23,7 +23,7 @@ class Connector extends EventEmitter implements ConnectorInterfaceProto
     private $sessionManager;
 
     /**
-     * @var Session\SessionInterface
+     * @var SessionInterface
      */
     private $session;
 

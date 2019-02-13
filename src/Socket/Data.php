@@ -1,6 +1,6 @@
 <?php
 
-namespace Proto;
+namespace Proto\Socket;
 
 use Proto\Pack\Pack;
 use Proto\Pack\PackInterface;

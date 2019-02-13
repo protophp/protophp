@@ -1,8 +1,9 @@
 <?php
 
-namespace Proto;
+namespace Proto\Socket;
 
 use Evenement\EventEmitterInterface;
+use Proto\ProtoOpt;
 use Proto\Session\Exception\SessionException;
 use Proto\Session\SessionManagerInterface;
 use React\EventLoop\LoopInterface;

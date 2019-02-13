@@ -1,6 +1,6 @@
 <?php
 
-namespace Proto;
+namespace Proto\Socket;
 
 use Evenement\EventEmitter;
 use Proto\Invoke\InvokeException;
@@ -9,6 +9,7 @@ use Proto\Pack\Pack;
 use Proto\Pack\PackInterface;
 use Proto\PromiseTransfer\ParserInterface;
 use Proto\PromiseTransfer\PromiseTransferInterface;
+use Proto\ProtoOpt;
 use Proto\Session\SessionInterface;
 use React\Promise\Deferred;
 use React\Promise\Promise;

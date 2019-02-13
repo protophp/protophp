@@ -1,6 +1,6 @@
 <?php
 
-namespace Proto;
+namespace Proto\Socket;
 
 use Evenement\EventEmitter;
 use Opt\OptTrait;

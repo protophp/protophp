@@ -1,6 +1,6 @@
 <?php
 
-namespace Proto;
+namespace Proto\Socket;
 
 use Proto\Pack\PackInterface;
 use Proto\PromiseTransfer\ParserInterface;

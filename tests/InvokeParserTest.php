@@ -23,16 +23,13 @@ class InvokeParserTest extends TestCase implements OptInterface
     {
         parent::__construct($name, $data, $dataName);
 
-        // Defaults options
+        // Set options manually for test
         $this
             ->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, true)
             ->setOpt(ProtoOpt::MAP_INVOKE, []);
 
-        /**
-         * @var ClassLoader $loader
-         */
-        $loader = require __DIR__ . '/../vendor/autoload.php';
-        AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
+        // Load annotations manually for test
+        require_once __DIR__ . '/../src/Annotations/RPC.php';
     }
 
     /**
