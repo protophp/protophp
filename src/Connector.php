@@ -9,6 +9,8 @@ use Proto\PromiseTransfer\PromiseTransferInterface;
 use Proto\Session\SessionInterface;
 use Proto\Session\SessionManagerInterface;
 use React\EventLoop\LoopInterface;
+use React\Promise\Deferred;
+use React\Promise\Promise;
 use React\Socket\ConnectionInterface;
 
 class Connector extends EventEmitter implements ConnectorInterface
@@ -35,7 +37,8 @@ class Connector extends EventEmitter implements ConnectorInterface
      */
     private $protoConn;
 
-    private $queue = [];
+    private $dataQueue = [];
+    private $invokeQueue = [];
     private $uri;
 
     public function __construct(string $uri, LoopInterface $loop, SessionManagerInterface $sessionManager, string $sessionKey = null, array $options = array())
@@ -43,6 +46,12 @@ class Connector extends EventEmitter implements ConnectorInterface
         $this->uri = $uri;
         $this->sessionManager = $sessionManager;
         $this->session = $this->sessionManager->start($sessionKey);
+
+        // Defaults options
+        $this
+            ->setOpt(self::OPT_DISALLOW_DIRECT_INVOKE, true)
+            ->setOpt(self::OPT_MAP_INVOKE, []);
+
         $this->connector = new \React\Socket\Connector($loop, $options);
     }
 
@@ -51,7 +60,18 @@ class Connector extends EventEmitter implements ConnectorInterface
         if (isset($this->protoConn))
             $this->protoConn->send($data, $onResponse, $onDelivery);
         else
-            $this->queue[] = [$data, $onResponse, $onDelivery];
+            $this->dataQueue[] = [$data, $onResponse, $onDelivery];
+    }
+
+    public function invoke($call, $params = []): Promise
+    {
+        if (isset($this->protoConn)) {
+            return $this->protoConn->invoke($call, $params);
+        } else {
+            $deferred = new Deferred();
+            $this->invokeQueue[] = [$call, $params, $deferred];
+            return $deferred->promise();
+        }
     }
 
     public function connect()
@@ -67,7 +87,7 @@ class Connector extends EventEmitter implements ConnectorInterface
 
                         // Initial the ProtoConnection
                         $this->protoConn = new ProtoConnection();
-                        $this->protoConn->setup($transfer, $session);
+                        $this->protoConn->setup($transfer, $session, $this);
 
                         // Emit the connection
                         $this->emit('connection', [$this->protoConn]);
@@ -84,11 +104,15 @@ class Connector extends EventEmitter implements ConnectorInterface
                     }
 
                     // Flush queue
-                    foreach ($this->queue as $params)
+                    foreach ($this->dataQueue as $params)
                         $this->protoConn->send($params[0], $params[1], $params[2]);
 
+                    foreach ($this->invokeQueue as $invoke)
+                        $this->protoConn->invoke($invoke[0], $invoke[1], $invoke[3]);
+
                     // Clear queue
-                    $this->queue = [];
+                    $this->dataQueue = [];
+                    $this->invokeQueue = [];
                 });
 
                 $conn->on('close', function () {
