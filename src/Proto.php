@@ -52,15 +52,12 @@ class Proto implements ProtoInterface
         return self::$loop;
     }
 
-    public static function setup(SessionManagerInterface $sessionManager, LoopInterface $loop): ProtoInterface
+    public static function getSessionManager(): SessionManagerInterface
     {
-        self::$sessionManager = $sessionManager;
-        self::$loop = $loop;
+        if (!isset(self::$sessionManager))
+            throw new \Exception("ProtoPHP doesn't set up yet!");
 
-        // Include Annotations
-        require_once __DIR__ . '/Annotations/RPC.php';
-
-        return self::getInstance();
+        return self::$sessionManager;
     }
 
     public static function getInstance(): ProtoInterface
@@ -72,5 +69,16 @@ class Proto implements ProtoInterface
             throw new \Exception("ProtoPHP doesn't set up yet!");
 
         return self::$instance = new self();
+    }
+
+    public static function setup(SessionManagerInterface $sessionManager, LoopInterface $loop): ProtoInterface
+    {
+        self::$sessionManager = $sessionManager;
+        self::$loop = $loop;
+
+        // Include Annotations
+        require_once __DIR__ . '/Annotations/RPC.php';
+
+        return self::getInstance();
     }
 }

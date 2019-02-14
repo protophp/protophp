@@ -15,7 +15,9 @@ interface ProtoInterface
 
     public static function getLoop(): LoopInterface;
 
-    public static function setup(SessionManagerInterface $sessionManager, LoopInterface $loop): ProtoInterface;
+    public static function getSessionManager(): SessionManagerInterface;
 
     public static function getInstance(): ProtoInterface;
+
+    public static function setup(SessionManagerInterface $sessionManager, LoopInterface $loop): ProtoInterface;
 }
