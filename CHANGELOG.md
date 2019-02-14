@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.2.1 (2019-02-14)
+
+* Feature: The "getSessionManager" method is added to the Proto class.
+
 ## v0.2.0 (2019-02-13)
 
 * Feature: The Remote Procedure Call (RPC) is added.
