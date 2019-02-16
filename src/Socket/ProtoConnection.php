@@ -74,6 +74,11 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
         return $deferred->promise();
     }
 
+    public function isConnected(): bool
+    {
+        return isset($this->transfer);
+    }
+
     public function setup(PromiseTransferInterface $transfer, SessionInterface $session, ProtoOpt $opt): ProtoConnectionInterface
     {
         $this->transfer = $transfer;
@@ -92,7 +97,7 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
 
     private function qSend(PackInterface $pack, callable $onResponse = null, callable $onDelivery = null)
     {
-        if (isset($this->transfer))
+        if ($this->isConnected())
             $this->transfer->send($pack, $onResponse, $onDelivery);
         else
             $this->queue->enqueue([$pack, $onResponse, $onDelivery]);
