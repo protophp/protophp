@@ -4,6 +4,8 @@ namespace Proto\Socket;
 
 use Evenement\EventEmitter;
 use Opt\OptTrait;
+use Proto\Broadcast\Broadcast;
+use Proto\Broadcast\BroadcastInterface;
 use Proto\PromiseTransfer\PromiseTransfer;
 use Proto\PromiseTransfer\PromiseTransferInterface;
 use Proto\Session\SessionInterface;
@@ -12,7 +14,7 @@ use React\EventLoop\LoopInterface;
 use React\Socket\ConnectionInterface;
 use React\Socket\Server;
 
-class Listener extends EventEmitter implements ListenerInterfaceProto
+class Listener extends EventEmitter implements ListenerInterface
 {
     use OptTrait;
 
@@ -26,9 +28,15 @@ class Listener extends EventEmitter implements ListenerInterfaceProto
      */
     private $server;
 
+    /**
+     * @var Broadcast
+     */
+    private $broadcast;
+
     public function __construct($uri, LoopInterface $loop, SessionManagerInterface $sessionManager)
     {
         $this->sessionManager = $sessionManager;
+        $this->broadcast = new Broadcast();
 
         // Defaults options
         $this
@@ -43,19 +51,19 @@ class Listener extends EventEmitter implements ListenerInterfaceProto
 
             $transfer->on('established', function (PromiseTransferInterface $transfer, SessionInterface $session) {
 
-                if (!$session->is('PROTO-CONN')) {
+                if (!$session->is('CONNECTION')) {
 
                     // Initial the ProtoConnection
-                    $conn = new ProtoConnection();
+                    $conn = new ProtoConnection(null, $this);
 
                     // Emit the connection
                     $this->emit('connection', [$conn]);
 
                     // Add to the session
-                    $session->set('PROTO-CONN', $conn);
+                    $session->set('CONNECTION', $conn);
 
                 } else
-                    $conn = $session->get('PROTO-CONN');
+                    $conn = $session->get('CONNECTION');
 
                 // Setup the connection in new transfer
                 $conn->setup($transfer, $session, $this);
@@ -63,6 +71,11 @@ class Listener extends EventEmitter implements ListenerInterfaceProto
             });
 
         });
+    }
+
+    public function broadcast(): BroadcastInterface
+    {
+        return $this->broadcast;
     }
 
 

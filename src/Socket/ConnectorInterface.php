@@ -3,6 +3,7 @@
 namespace Proto\Socket;
 
 use Evenement\EventEmitterInterface;
+use Proto\Broadcast\BroadcastReceiverInterface;
 use Proto\ProtoOpt;
 use Proto\Session\Exception\SessionException;
 use Proto\Session\SessionManagerInterface;
@@ -24,6 +25,8 @@ interface ConnectorInterface extends EventEmitterInterface, ProtoOpt
     public function send($data, callable $onResponse = null, callable $onDelivery = null): ConnectorInterface;
 
     public function invoke($call, $params = []): Promise;
+
+    public function broadcast(): BroadcastReceiverInterface;
 
     public function connect(): ConnectorInterface;
 }

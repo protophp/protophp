@@ -4,12 +4,13 @@ namespace Proto\Socket;
 
 use Evenement\EventEmitter;
 use Opt\OptTrait;
+use Proto\Broadcast\BroadcastReceiver;
+use Proto\Broadcast\BroadcastReceiverInterface;
 use Proto\PromiseTransfer\PromiseTransfer;
 use Proto\PromiseTransfer\PromiseTransferInterface;
 use Proto\Session\SessionInterface;
 use Proto\Session\SessionManagerInterface;
 use React\EventLoop\LoopInterface;
-use React\Promise\Deferred;
 use React\Promise\Promise;
 use React\Socket\ConnectionInterface;
 
@@ -36,6 +37,11 @@ class Connector extends EventEmitter implements ConnectorInterface
      * @var ProtoConnectionInterface
      */
     private $conn;
+
+    /**
+     * @var BroadcastReceiver
+     */
+    private $broadcast;
     private $uri;
 
     public function __construct(string $uri, LoopInterface $loop, SessionManagerInterface $sessionManager, string $sessionKey = null)
@@ -49,8 +55,11 @@ class Connector extends EventEmitter implements ConnectorInterface
             ->setOpt(self::DISALLOW_DIRECT_INVOKE, true)
             ->setOpt(self::MAP_INVOKE, []);
 
-        $this->conn = new ProtoConnection();
+        $this->conn = new ProtoConnection($this);
+        $this->broadcast = new BroadcastReceiver($this->conn);
         $this->connector = new \React\Socket\Connector($loop, []);
+
+        $this->conn->on('data', [$this->broadcast, 'income']);
     }
 
     public function send($data, callable $onResponse = null, callable $onDelivery = null): ConnectorInterface
@@ -64,6 +73,11 @@ class Connector extends EventEmitter implements ConnectorInterface
         return $this->conn->invoke($call, $params);
     }
 
+    public function broadcast(): BroadcastReceiverInterface
+    {
+        return $this->broadcast;
+    }
+
     public function connect(): ConnectorInterface
     {
         $this->connector->connect($this->uri)
@@ -73,7 +87,7 @@ class Connector extends EventEmitter implements ConnectorInterface
                 $transfer->init($this->session);
                 $transfer->on('established', function (PromiseTransferInterface $transfer, SessionInterface $session) {
 
-                    if (!$session->is('CONNECTION-EMITTED')) {
+                    if (!$session->is('FIRST_CONNECTION')) {
 
                         // Initial the ProtoConnection
                         $this->conn->setup($transfer, $session, $this);
@@ -82,7 +96,7 @@ class Connector extends EventEmitter implements ConnectorInterface
                         $this->emit('connection', [$this->conn]);
 
                         // Add to the session
-                        $session->set('CONNECTION-EMITTED', true);
+                        $session->set('FIRST_CONNECTION', true);
 
                     } else {
                         // Get ProtoConnection from session
