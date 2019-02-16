@@ -13,5 +13,5 @@ interface ProtoConnectionInterface extends EventEmitterInterface
 
     public function send($data, callable $onResponse = null, callable $onDelivery = null);
 
-    public function invoke($call, $params = [], Deferred $deferred = null): Promise;
+    public function invoke($call, $params = []): Promise;
 }

@@ -32,6 +32,16 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
      */
     private $opt;
 
+    /**
+     * @var \SplQueue
+     */
+    private $queue;
+
+    public function __construct()
+    {
+        $this->queue = new \SplQueue();
+    }
+
     public function send($data, callable $onResponse = null, callable $onDelivery = null)
     {
         if (!$data instanceof PackInterface) {
@@ -44,16 +54,15 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
         }
 
         $data->setHeaderByKey(1, self::PROTO_DATA);
-        $this->transfer->send($data, $onResponse, $onDelivery);
+        $this->qSend($data, $onResponse, $onDelivery);
     }
 
-    public function invoke($call, $params = [], Deferred $deferred = null): Promise
+    public function invoke($call, $params = []): Promise
     {
-        if ($deferred === null)
-            $deferred = new Deferred();
+        $deferred = new Deferred();
 
         $pack = (new Pack())->setHeaderByKey(1, self::PROTO_RPC)->setData([$call, $params]);
-        $this->transfer->send($pack, function (PackInterface $pack) use ($deferred) {
+        $this->qSend($pack, function (PackInterface $pack) use ($deferred) {
             $return = $pack->getData();
 
             if ($return instanceof ProtoException)
@@ -71,6 +80,26 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
         $this->session = $session;
         $this->opt = $opt;
 
+        // Set transfer events
+        $this->setTransferEvents();
+
+        // Flush queue
+        while (!$this->queue->isEmpty())
+            $this->transfer->send(...$this->queue->dequeue());
+
+        return $this;
+    }
+
+    private function qSend(PackInterface $pack, callable $onResponse = null, callable $onDelivery = null)
+    {
+        if (isset($this->transfer))
+            $this->transfer->send($pack, $onResponse, $onDelivery);
+        else
+            $this->queue->enqueue([$pack, $onResponse, $onDelivery]);
+    }
+
+    private function setTransferEvents()
+    {
         $this->transfer->on('data', function (PackInterface $pack, ParserInterface $parser) {
             $data = new Data($pack, $parser, $this->transfer);
 
@@ -128,6 +157,8 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
             }
         });
 
-        return $this;
+        $this->transfer->on('close', function () {
+            $this->transfer = null;
+        });
     }
 }

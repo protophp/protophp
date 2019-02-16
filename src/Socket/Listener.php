@@ -46,19 +46,19 @@ class Listener extends EventEmitter implements ListenerInterfaceProto
                 if (!$session->is('PROTO-CONN')) {
 
                     // Initial the ProtoConnection
-                    $protoConn = new ProtoConnection();
+                    $conn = new ProtoConnection();
 
                     // Emit the connection
-                    $this->emit('connection', [$protoConn]);
+                    $this->emit('connection', [$conn]);
 
                     // Add to the session
-                    $session->set('PROTO-CONN', $protoConn);
+                    $session->set('PROTO-CONN', $conn);
 
                 } else
-                    $protoConn = $session->get('PROTO-CONN');
+                    $conn = $session->get('PROTO-CONN');
 
                 // Setup the connection in new transfer
-                $protoConn->setup($transfer, $session, $this);
+                $conn->setup($transfer, $session, $this);
 
             });
 
