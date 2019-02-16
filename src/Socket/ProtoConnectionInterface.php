@@ -15,5 +15,11 @@ interface ProtoConnectionInterface extends EventEmitterInterface
 
     public function invoke($call, $params = []): Promise;
 
+    public function getId(): int;
+
+    public function getConnector(): ConnectorInterface;
+
+    public function getListener(): ListenerInterface;
+
     public function isConnected(): bool;
 }

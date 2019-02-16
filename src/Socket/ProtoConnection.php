@@ -37,9 +37,24 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
      */
     private $queue;
 
-    public function __construct()
+    /**
+     * @var ConnectorInterface
+     */
+    private $connector;
+
+    /**
+     * @var ListenerInterface
+     */
+    private $listener;
+    private $id;
+
+    public function __construct(ConnectorInterface $connector = null, ListenerInterface $listener = null)
     {
+        $this->id = spl_object_id($this);
         $this->queue = new \SplQueue();
+
+        $this->connector = $connector;
+        $this->listener = $listener;
     }
 
     public function send($data, callable $onResponse = null, callable $onDelivery = null)
@@ -72,6 +87,21 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
         });
 
         return $deferred->promise();
+    }
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function getConnector(): ConnectorInterface
+    {
+        return $this->connector;
+    }
+
+    public function getListener(): ListenerInterface
+    {
+        return $this->listener;
     }
 
     public function isConnected(): bool
