@@ -15,7 +15,7 @@ interface ProtoConnectionInterface extends EventEmitterInterface
 
     public function invoke($call, $params = []): Promise;
 
-    public function getId(): int;
+    public function getId();
 
     public function getHash(): string;
 

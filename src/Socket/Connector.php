@@ -58,8 +58,6 @@ class Connector extends EventEmitter implements ConnectorInterface
         $this->conn = new ProtoConnection($this);
         $this->broadcast = new BroadcastReceiver($this->conn);
         $this->connector = new \React\Socket\Connector($loop, []);
-
-        $this->conn->on('data', [$this->broadcast, 'income']);
     }
 
     public function send($data, callable $onResponse = null, callable $onDelivery = null): ConnectorInterface

@@ -4,12 +4,14 @@ namespace Proto\Broadcast;
 
 use Proto\Pack\Pack;
 use Proto\Pack\PackInterface;
+use Proto\Socket\DataInterface;
+use Proto\Socket\ProtoConnection;
 use Proto\Socket\ProtoConnectionInterface;
 
 class BroadcastReceiver implements BroadcastReceiverInterface
 {
     /**
-     * @var ProtoConnectionInterface
+     * @var ProtoConnection
      */
     private $conn;
 
@@ -23,11 +25,10 @@ class BroadcastReceiver implements BroadcastReceiverInterface
     public function on($name, callable $callback): BroadcastReceiverInterface
     {
         $pack = (new Pack())
-            ->setHeaderByKey(1, ProtoConnectionInterface::PROTO_BROADCAST)
             ->setHeaderByKey(2, self::ACTION_REGISTER)
             ->setHeaderByKey(3, $name);
 
-        $this->conn->send($pack, null, function () use ($name, $callback) {
+        $this->conn->broadcast($pack, null, function () use ($name, $callback) {
             $this->listener[$name][] = $callback;
         });
 
@@ -37,11 +38,10 @@ class BroadcastReceiver implements BroadcastReceiverInterface
     public function off($name): BroadcastReceiverInterface
     {
         $pack = (new Pack())
-            ->setHeaderByKey(1, ProtoConnectionInterface::PROTO_BROADCAST)
             ->setHeaderByKey(2, self::ACTION_UNREGISTER)
             ->setHeaderByKey(3, $name);
 
-        $this->conn->send($pack, null, function () use ($name) {
+        $this->conn->broadcast($pack, null, function () use ($name) {
             unset($this->listener[$name]);
         });
 
@@ -50,9 +50,6 @@ class BroadcastReceiver implements BroadcastReceiverInterface
 
     public function income(PackInterface $pack)
     {
-        if ($pack->getHeaderByKey(1) !== ProtoConnectionInterface::PROTO_BROADCAST)
-            return;
-
         if ($pack->getHeaderByKey(2) !== self::ACTION_EMITTED) {
             // TODO Error
             return;

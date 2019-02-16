@@ -3,6 +3,8 @@
 namespace Proto\Socket;
 
 use Evenement\EventEmitter;
+use Proto\Broadcast\Broadcast;
+use Proto\Broadcast\BroadcastReceiver;
 use Proto\Invoke\InvokeException;
 use Proto\Invoke\InvokeParser;
 use Proto\Pack\Pack;
@@ -46,6 +48,8 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
      * @var ListenerInterface
      */
     private $listener;
+
+    private $isListenerConn;
     private $id = null;
     private $hash;
 
@@ -59,6 +63,7 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
 
         $this->connector = $connector;
         $this->listener = $listener;
+        $this->isListenerConn = ($listener !== null);
     }
 
     public function send($data, callable $onResponse = null, callable $onDelivery = null)
@@ -93,7 +98,13 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
         return $deferred->promise();
     }
 
-    public function getId(): int
+    public function broadcast(PackInterface $pack, callable $onResponse = null, callable $onDelivery = null)
+    {
+        $pack->setHeaderByKey(1, self::PROTO_BROADCAST);
+        $this->qSend($pack, $onResponse, $onDelivery);
+    }
+
+    public function getId()
     {
         return $this->id;
     }
@@ -193,6 +204,20 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
                     } else {
                         $data->response($result);
                     }
+                    return;
+
+                case self::PROTO_BROADCAST:
+
+                    if ($this->isListenerConn) {
+                        /** @var Broadcast $broadcast */
+                        $broadcast = $this->listener->broadcast();
+                        $broadcast->income($pack, $this);
+                    } else {
+                        /** @var BroadcastReceiver $broadcast */
+                        $broadcast = $this->connector->broadcast();
+                        $broadcast->income($pack);
+                    }
+
                     return;
 
                 default:
