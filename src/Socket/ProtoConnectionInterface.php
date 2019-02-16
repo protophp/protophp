@@ -17,6 +17,8 @@ interface ProtoConnectionInterface extends EventEmitterInterface
 
     public function getId(): int;
 
+    public function getHash(): string;
+
     public function getConnector(): ConnectorInterface;
 
     public function getListener(): ListenerInterface;

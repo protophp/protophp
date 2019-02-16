@@ -42,17 +42,19 @@ class Broadcast implements BroadcastInterface
         $action = $pack->getHeaderByKey(2);
         $name = $pack->getHeaderByKey(3);
 
+        $identifyId = $conn->getId() === null ? $conn->getHash() : $conn->getId();
+
         switch ($action) {
             case self::ACTION_REGISTER:
-                if (isset($this->listeners[$name][$conn->getId()]))
+                if (isset($this->listeners[$name][$identifyId]))
                     return;
 
-                $this->listeners[$name][$conn->getId()] = $conn;
+                $this->listeners[$name][$identifyId] = $conn;
                 break;
 
             case self::ACTION_UNREGISTER:
-                if (isset($this->listeners[$name][$conn->getId()]))
-                    unset($this->listeners[$name][$conn->getId()]);
+                if (isset($this->listeners[$name][$identifyId]))
+                    unset($this->listeners[$name][$identifyId]);
                 break;
 
             default:

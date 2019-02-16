@@ -46,11 +46,15 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
      * @var ListenerInterface
      */
     private $listener;
-    private $id;
+    private $id = null;
+    private $hash;
 
     public function __construct(ConnectorInterface $connector = null, ListenerInterface $listener = null)
     {
-        $this->id = spl_object_id($this);
+        $this->hash = \spl_object_hash($this);
+        if (PHP_VERSION_ID >= 70200)
+            $this->id = \spl_object_id($this);
+
         $this->queue = new \SplQueue();
 
         $this->connector = $connector;
@@ -92,6 +96,11 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
     public function getId(): int
     {
         return $this->id;
+    }
+
+    public function getHash(): string
+    {
+        return $this->hash;
     }
 
     public function getConnector(): ConnectorInterface
