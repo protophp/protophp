@@ -43,6 +43,7 @@ class Connector extends EventEmitter implements ConnectorInterface
      */
     private $broadcast;
     private $uri;
+    private $connecting = false;
 
     public function __construct(string $uri, LoopInterface $loop, SessionManagerInterface $sessionManager, string $sessionKey = null)
     {
@@ -60,7 +61,7 @@ class Connector extends EventEmitter implements ConnectorInterface
         $this->connector = new \React\Socket\Connector($loop, []);
     }
 
-    public function send($data, callable $onResponse = null, callable $onDelivery = null): ConnectorInterface
+    public function send($data, callable $onResponse = null, callable $onDelivery = null)
     {
         $this->conn->send($data, $onResponse, $onDelivery);
         return $this;
@@ -76,10 +77,15 @@ class Connector extends EventEmitter implements ConnectorInterface
         return $this->broadcast;
     }
 
-    public function connect(): ConnectorInterface
+    public function connect()
     {
+        if ($this->conn->isConnected() || $this->connecting)
+            return $this;
+
+        $this->connecting = true;
         $this->connector->connect($this->uri)
             ->then(function (ConnectionInterface $conn) {
+                $this->connecting = false;
 
                 $transfer = new PromiseTransfer($conn, $this->sessionManager);
                 $transfer->init($this->session);
@@ -113,6 +119,7 @@ class Connector extends EventEmitter implements ConnectorInterface
 
             })
             ->otherwise(function (\Exception $e) {
+                $this->connecting = false;
                 $this->emit('error', [$e]);
             });
 

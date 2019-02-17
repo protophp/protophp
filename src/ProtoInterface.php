@@ -9,15 +9,25 @@ use React\EventLoop\LoopInterface;
 
 interface ProtoInterface
 {
-    public function connector(string $uri, string $sessionKey = null, SessionManagerInterface $sessionManager = null): Connector;
+    public function uri(string $uri): ProtoInterface;
 
-    public function listener($uri, SessionManagerInterface $sessionManager = null): Listener;
+    public function name($name): ProtoInterface;
+
+    public function sessionKey(string $sessionKey): ProtoInterface;
+
+    public function sessionManager(SessionManagerInterface $sessionManager): ProtoInterface;
+
+    public function connect(): Connector;
+
+    public function listen(): Listener;
+
+    public static function getConnector($name): Connector;
+
+    public static function getListener($name): Listener;
 
     public static function getLoop(): LoopInterface;
 
     public static function getSessionManager(): SessionManagerInterface;
 
-    public static function getInstance(): ProtoInterface;
-
-    public static function setup(SessionManagerInterface $sessionManager, LoopInterface $loop): ProtoInterface;
+    public static function setup(SessionManagerInterface $sessionManager, LoopInterface $loop);
 }

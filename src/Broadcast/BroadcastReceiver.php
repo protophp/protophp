@@ -4,7 +4,6 @@ namespace Proto\Broadcast;
 
 use Proto\Pack\Pack;
 use Proto\Pack\PackInterface;
-use Proto\Socket\DataInterface;
 use Proto\Socket\ProtoConnection;
 use Proto\Socket\ProtoConnectionInterface;
 

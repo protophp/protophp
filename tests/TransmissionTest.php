@@ -15,12 +15,13 @@ class TransmissionTest extends TestCase
     public function test()
     {
         Proto::setup(new SessionManager(), Factory::create());
-        $proto = Proto::getInstance();
 
         // Find an unused unprivileged TCP port
         $port = (int)shell_exec('netstat -atn | awk \' /tcp/ {printf("%s\n",substr($4,index($4,":")+1,length($4) )) }\' | sed -e "s/://g" | sort -rnu | awk \'{array [$1] = $1} END {i=32768; again=1; while (again == 1) {if (array[i] == i) {i=i+1} else {print i; again=0}}}\'');
 
-        $proto->listener("127.0.0.1:$port")
+        (new Proto())
+            ->uri("127.0.0.1:$port")
+            ->listen()
             ->on('connection', function (ProtoConnectionInterface $conn) {
 
                 $this->assertTrue($conn instanceof ProtoConnectionInterface);
@@ -38,7 +39,9 @@ class TransmissionTest extends TestCase
                 });
             });
 
-        $proto->connector("127.0.0.1:$port")
+        (new Proto())
+            ->uri("127.0.0.1:$port")
+            ->connect()
             ->on('connection', function (ProtoConnectionInterface $conn) {
 
                 $this->assertTrue($conn instanceof ProtoConnectionInterface);
@@ -52,8 +55,7 @@ class TransmissionTest extends TestCase
                         $this->assertTrue(true);
                     }
                 );
-            })
-            ->connect();
+            });
 
         Proto::getLoop()->run();
     }
@@ -61,12 +63,13 @@ class TransmissionTest extends TestCase
     public function testQueue()
     {
         Proto::setup(new SessionManager(), Factory::create());
-        $proto = Proto::getInstance();
 
         // Find an unused unprivileged TCP port
         $port = (int)shell_exec('netstat -atn | awk \' /tcp/ {printf("%s\n",substr($4,index($4,":")+1,length($4) )) }\' | sed -e "s/://g" | sort -rnu | awk \'{array [$1] = $1} END {i=32768; again=1; while (again == 1) {if (array[i] == i) {i=i+1} else {print i; again=0}}}\'');
 
-        $proto->listener("127.0.0.1:$port")
+        (new Proto())
+            ->uri("127.0.0.1:$port")
+            ->listen()
             ->on('connection', function (ProtoConnectionInterface $conn) {
 
                 $this->assertTrue($conn instanceof ProtoConnectionInterface);
@@ -84,20 +87,22 @@ class TransmissionTest extends TestCase
                 });
             });
 
-        $connector = $proto->connector("127.0.0.1:$port");
-        $connector->on('connection', function (ProtoConnectionInterface $conn) {
-            $this->assertTrue($conn instanceof ProtoConnectionInterface);
-        })->connect();
+        (new Proto())
+            ->uri("127.0.0.1:$port")
+            ->connect()
+            ->on('connection', function (ProtoConnectionInterface $conn) {
+                $this->assertTrue($conn instanceof ProtoConnectionInterface);
+            })
+            ->send('MESSAGE',
+                function (PackInterface $pack) {
+                    $this->assertTrue($pack instanceof PackInterface);
 
-        $connector->send('MESSAGE',
-            function (PackInterface $pack) {
-                $this->assertTrue($pack instanceof PackInterface);
+                },
+                function () {
+                    $this->assertTrue(true);
+                }
+            );
 
-            },
-            function () {
-                $this->assertTrue(true);
-            }
-        );
 
         Proto::getLoop()->run();
     }
