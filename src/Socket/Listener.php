@@ -54,7 +54,7 @@ class Listener extends EventEmitter implements ListenerInterface
                 if (!$session->is('CONNECTION')) {
 
                     // Initial the ProtoConnection
-                    $conn = new ProtoConnection(null, $this);
+                    $conn = new Connection(null, $this);
 
                     // Emit the connection
                     $this->emit('connection', [$conn]);

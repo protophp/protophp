@@ -4,8 +4,8 @@ namespace Proto\Broadcast;
 
 use Proto\Pack\Pack;
 use Proto\Pack\PackInterface;
-use Proto\Socket\ProtoConnection;
-use Proto\Socket\ProtoConnectionInterface;
+use Proto\Socket\Connection;
+use Proto\Socket\ConnectionInterface;
 
 class Broadcast implements BroadcastInterface
 {
@@ -17,7 +17,7 @@ class Broadcast implements BroadcastInterface
             return $this;
 
         /**
-         * @var $conn ProtoConnection
+         * @var $conn Connection
          */
         foreach ($this->listeners[$name] as $conn) {
             if (!$conn->isConnected())
@@ -34,7 +34,7 @@ class Broadcast implements BroadcastInterface
         return $this;
     }
 
-    public function income(PackInterface $pack, ProtoConnectionInterface $conn)
+    public function income(PackInterface $pack, ConnectionInterface $conn)
     {
         $action = $pack->getHeaderByKey(2);
         $name = $pack->getHeaderByKey(3);

@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Proto\Proto;
 use Proto\Socket\DataInterface;
 use Proto\Pack\PackInterface;
-use Proto\Socket\ProtoConnectionInterface;
+use Proto\Socket\ConnectionInterface;
 use Proto\Session\SessionManager;
 use React\EventLoop\Factory;
 
@@ -22,9 +22,9 @@ class TransmissionTest extends TestCase
         (new Proto())
             ->uri("127.0.0.1:$port")
             ->listen()
-            ->on('connection', function (ProtoConnectionInterface $conn) {
+            ->on('connection', function (ConnectionInterface $conn) {
 
-                $this->assertTrue($conn instanceof ProtoConnectionInterface);
+                $this->assertTrue($conn instanceof ConnectionInterface);
 
                 $conn->on('data', function (DataInterface $data) {
 
@@ -42,9 +42,9 @@ class TransmissionTest extends TestCase
         (new Proto())
             ->uri("127.0.0.1:$port")
             ->connect()
-            ->on('connection', function (ProtoConnectionInterface $conn) {
+            ->on('connection', function (ConnectionInterface $conn) {
 
-                $this->assertTrue($conn instanceof ProtoConnectionInterface);
+                $this->assertTrue($conn instanceof ConnectionInterface);
 
                 $conn->send('MESSAGE',
                     function (PackInterface $pack) {
@@ -70,9 +70,9 @@ class TransmissionTest extends TestCase
         (new Proto())
             ->uri("127.0.0.1:$port")
             ->listen()
-            ->on('connection', function (ProtoConnectionInterface $conn) {
+            ->on('connection', function (ConnectionInterface $conn) {
 
-                $this->assertTrue($conn instanceof ProtoConnectionInterface);
+                $this->assertTrue($conn instanceof ConnectionInterface);
 
                 $conn->on('data', function (DataInterface $data) {
 
@@ -90,8 +90,8 @@ class TransmissionTest extends TestCase
         (new Proto())
             ->uri("127.0.0.1:$port")
             ->connect()
-            ->on('connection', function (ProtoConnectionInterface $conn) {
-                $this->assertTrue($conn instanceof ProtoConnectionInterface);
+            ->on('connection', function (ConnectionInterface $conn) {
+                $this->assertTrue($conn instanceof ConnectionInterface);
             })
             ->send('MESSAGE',
                 function (PackInterface $pack) {

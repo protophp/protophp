@@ -4,19 +4,19 @@ namespace Proto\Broadcast;
 
 use Proto\Pack\Pack;
 use Proto\Pack\PackInterface;
-use Proto\Socket\ProtoConnection;
-use Proto\Socket\ProtoConnectionInterface;
+use Proto\Socket\Connection;
+use Proto\Socket\ConnectionInterface;
 
 class BroadcastReceiver implements BroadcastReceiverInterface
 {
     /**
-     * @var ProtoConnection
+     * @var Connection
      */
     private $conn;
 
     private $listener = [];
 
-    public function __construct(ProtoConnectionInterface $conn)
+    public function __construct(ConnectionInterface $conn)
     {
         $this->conn = $conn;
     }

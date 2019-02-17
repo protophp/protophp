@@ -34,7 +34,7 @@ class Connector extends EventEmitter implements ConnectorInterface
     private $connector;
 
     /**
-     * @var ProtoConnectionInterface
+     * @var ConnectionInterface
      */
     private $conn;
 
@@ -56,7 +56,7 @@ class Connector extends EventEmitter implements ConnectorInterface
             ->setOpt(self::DISALLOW_DIRECT_INVOKE, true)
             ->setOpt(self::MAP_INVOKE, []);
 
-        $this->conn = new ProtoConnection($this);
+        $this->conn = new Connection($this);
         $this->broadcast = new BroadcastReceiver($this->conn);
         $this->connector = new \React\Socket\Connector(Proto::getLoop(), []);
     }

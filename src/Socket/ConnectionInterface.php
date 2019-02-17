@@ -5,7 +5,7 @@ namespace Proto\Socket;
 use Evenement\EventEmitterInterface;
 use React\Promise\Promise;
 
-interface ProtoConnectionInterface extends EventEmitterInterface
+interface ConnectionInterface extends EventEmitterInterface
 {
     const PROTO_DATA = 0;
     const PROTO_RPC = 1;

@@ -17,7 +17,7 @@ use Proto\Session\SessionInterface;
 use React\Promise\Deferred;
 use React\Promise\Promise;
 
-class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
+class Connection extends EventEmitter implements ConnectionInterface
 {
     /**
      * @var PromiseTransferInterface
@@ -129,7 +129,7 @@ class ProtoConnection extends EventEmitter implements ProtoConnectionInterface
         return isset($this->transfer);
     }
 
-    public function setup(PromiseTransferInterface $transfer, SessionInterface $session, ProtoOpt $opt): ProtoConnectionInterface
+    public function setup(PromiseTransferInterface $transfer, SessionInterface $session, ProtoOpt $opt): ConnectionInterface
     {
         $this->transfer = $transfer;
         $this->session = $session;

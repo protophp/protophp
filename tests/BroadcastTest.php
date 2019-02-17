@@ -5,7 +5,7 @@ namespace Proto\Tests;
 use PHPUnit\Framework\TestCase;
 use Proto\Proto;
 use Proto\Session\SessionManager;
-use Proto\Socket\ProtoConnectionInterface;
+use Proto\Socket\ConnectionInterface;
 use React\EventLoop\Factory;
 
 class BroadcastTest extends TestCase
@@ -25,7 +25,7 @@ class BroadcastTest extends TestCase
         (new Proto())
             ->uri("127.0.0.1:$port")
             ->connect()
-            ->on('connection', function (ProtoConnectionInterface $conn) {
+            ->on('connection', function (ConnectionInterface $conn) {
                 $conn->getConnector()->broadcast()->on('SampleBroadcast', function ($data) {
                     $this->assertSame('BroadcastDATA', $data);
                     Proto::getLoop()->stop();
@@ -54,7 +54,7 @@ class BroadcastTest extends TestCase
         (new Proto())
             ->uri("127.0.0.1:$port")
             ->connect()
-            ->on('connection', function (ProtoConnectionInterface $conn) {
+            ->on('connection', function (ConnectionInterface $conn) {
                 $conn->getConnector()->broadcast()->on('SampleBroadcast', function ($data) {
                     $this->assertSame('BroadcastDATA', $data);
                 });
@@ -63,7 +63,7 @@ class BroadcastTest extends TestCase
         (new Proto())
             ->uri("127.0.0.1:$port")
             ->connect()
-            ->on('connection', function (ProtoConnectionInterface $conn) {
+            ->on('connection', function (ConnectionInterface $conn) {
                 $conn->getConnector()->broadcast()->on('SampleBroadcast', function ($data) {
                     $this->assertSame('BroadcastDATA', $data);
                 });
