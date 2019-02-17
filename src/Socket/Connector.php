@@ -8,9 +8,9 @@ use Proto\Broadcast\BroadcastReceiver;
 use Proto\Broadcast\BroadcastReceiverInterface;
 use Proto\PromiseTransfer\PromiseTransfer;
 use Proto\PromiseTransfer\PromiseTransferInterface;
+use Proto\Proto;
 use Proto\Session\SessionInterface;
 use Proto\Session\SessionManagerInterface;
-use React\EventLoop\LoopInterface;
 use React\Promise\Promise;
 use React\Socket\ConnectionInterface;
 
@@ -45,7 +45,7 @@ class Connector extends EventEmitter implements ConnectorInterface
     private $uri;
     private $connecting = false;
 
-    public function __construct(string $uri, LoopInterface $loop, SessionManagerInterface $sessionManager, string $sessionKey = null)
+    public function __construct(string $uri, SessionManagerInterface $sessionManager, string $sessionKey = null)
     {
         $this->uri = $uri;
         $this->sessionManager = $sessionManager;
@@ -58,7 +58,7 @@ class Connector extends EventEmitter implements ConnectorInterface
 
         $this->conn = new ProtoConnection($this);
         $this->broadcast = new BroadcastReceiver($this->conn);
-        $this->connector = new \React\Socket\Connector($loop, []);
+        $this->connector = new \React\Socket\Connector(Proto::getLoop(), []);
     }
 
     public function send($data, callable $onResponse = null, callable $onDelivery = null)

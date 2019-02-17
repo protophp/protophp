@@ -8,9 +8,9 @@ use Proto\Broadcast\Broadcast;
 use Proto\Broadcast\BroadcastInterface;
 use Proto\PromiseTransfer\PromiseTransfer;
 use Proto\PromiseTransfer\PromiseTransferInterface;
+use Proto\Proto;
 use Proto\Session\SessionInterface;
 use Proto\Session\SessionManagerInterface;
-use React\EventLoop\LoopInterface;
 use React\Socket\ConnectionInterface;
 use React\Socket\Server;
 
@@ -33,7 +33,7 @@ class Listener extends EventEmitter implements ListenerInterface
      */
     private $broadcast;
 
-    public function __construct($uri, LoopInterface $loop, SessionManagerInterface $sessionManager)
+    public function __construct($uri, SessionManagerInterface $sessionManager)
     {
         $this->sessionManager = $sessionManager;
         $this->broadcast = new Broadcast();
@@ -43,7 +43,7 @@ class Listener extends EventEmitter implements ListenerInterface
             ->setOpt(self::DISALLOW_DIRECT_INVOKE, true)
             ->setOpt(self::MAP_INVOKE, []);
 
-        $this->server = new Server($uri, $loop, []);
+        $this->server = new Server($uri, Proto::getLoop(), []);
         $this->server->on('connection', function (ConnectionInterface $conn) {
 
             $transfer = new PromiseTransfer($conn, $this->sessionManager);

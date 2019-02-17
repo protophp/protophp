@@ -6,11 +6,16 @@ use Evenement\EventEmitterInterface;
 use Proto\Broadcast\BroadcastInterface;
 use Proto\ProtoOpt;
 use Proto\Session\SessionManagerInterface;
-use React\EventLoop\LoopInterface;
 
 interface ListenerInterface extends EventEmitterInterface, ProtoOpt
 {
-    public function __construct($uri, LoopInterface $loop, SessionManagerInterface $sessionManager);
+    /**
+     * ListenerInterface constructor.
+     * @param $uri
+     * @param SessionManagerInterface $sessionManager
+     * @throws \Exception
+     */
+    public function __construct($uri, SessionManagerInterface $sessionManager);
 
     public function broadcast(): BroadcastInterface;
 }

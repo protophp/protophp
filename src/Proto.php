@@ -5,6 +5,7 @@ namespace Proto;
 use Proto\Session\SessionManagerInterface;
 use Proto\Socket\Connector;
 use Proto\Socket\Listener;
+use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
 
 class Proto implements ProtoInterface
@@ -24,6 +25,7 @@ class Proto implements ProtoInterface
 
     private $uri = null;
     private $name = null;
+    private $logger = null;
     private $sessionKey = null;
     private $overwriteSessionManager = null;
 
@@ -47,6 +49,12 @@ class Proto implements ProtoInterface
         return $this;
     }
 
+    public function logger(LoggerInterface $logger): ProtoInterface
+    {
+        $this->logger = $logger;
+        return $this;
+    }
+
     public function sessionKey(string $sessionKey): ProtoInterface
     {
         $this->sessionKey = $sessionKey;
@@ -65,7 +73,7 @@ class Proto implements ProtoInterface
             throw new \Exception("The uri is not set!");
 
         $connector =
-            (new Connector($this->uri, self::$loop, $this->overwriteSessionManager, $this->sessionKey))
+            (new Connector($this->uri, $this->overwriteSessionManager, $this->sessionKey))
                 ->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, true)
                 ->setOpt(ProtoOpt::MAP_INVOKE, [])
                 ->connect();
@@ -82,7 +90,7 @@ class Proto implements ProtoInterface
             throw new \Exception("The uri is not set!");
 
         $listener =
-            (new Listener($this->uri, self::$loop, $this->overwriteSessionManager))
+            (new Listener($this->uri, $this->overwriteSessionManager))
                 ->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, true)
                 ->setOpt(ProtoOpt::MAP_INVOKE, []);
 
