@@ -82,13 +82,13 @@ class Connection extends EventEmitter implements ConnectionInterface
 
         $pack = (new Pack())->setHeaderByKey(PROTO_RESERVED_KEY, self::PROTO_RPC)->setData([$call, $params]);
         $this->qSend($pack, function (PackInterface $pack) use ($deferred) {
-            $return = $pack->getData();
 
-            if ($pack->getHeaderByKey(PROTO_RESERVED_KEY, ConnectionInterface::PROTO_EXCEPTION)) {
+            if ($pack->getHeaderByKey(PROTO_RESERVED_KEY) === ConnectionInterface::PROTO_EXCEPTION) {
                 list($class, $message, $code) = $pack->getData();
                 $deferred->reject(class_exists($class) ? new $class($message, $code) : new \Exception($message, $code));
             } else
-                $deferred->resolve($return);
+                $deferred->resolve($pack->getData());
+
         });
 
         return $deferred->promise();
