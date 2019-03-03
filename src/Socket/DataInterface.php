@@ -14,9 +14,13 @@ interface DataInterface
 
     public function getData();
 
+    public function getException(): \Throwable;
+
     public function isWaitForResponse(): bool;
 
     public function isResponseSent(): bool;
+
+    public function isException(): bool;
 
     public function response($data, callable $onDelivery = null): bool;
 }

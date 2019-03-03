@@ -5,8 +5,11 @@ namespace Proto\Socket;
 use Evenement\EventEmitterInterface;
 use React\Promise\Promise;
 
+define('PROTO_RESERVED_KEY', \pack('C', 250));
+
 interface ConnectionInterface extends EventEmitterInterface
 {
+    const PROTO_EXCEPTION = -1;
     const PROTO_DATA = 0;
     const PROTO_RPC = 1;
     const PROTO_BROADCAST = 2;

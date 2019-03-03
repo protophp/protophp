@@ -6,7 +6,6 @@ use Proto\Pack\Pack;
 use Proto\Pack\PackInterface;
 use Proto\PromiseTransfer\ParserInterface;
 use Proto\PromiseTransfer\PromiseTransferInterface;
-use Proto\ProtoException;
 
 class Data implements DataInterface
 {
@@ -25,13 +24,25 @@ class Data implements DataInterface
      */
     private $transfer;
 
+    /**
+     * @var \Throwable
+     */
+    private $exception;
     private $isResponseSent = false;
+    private $isException = false;
 
     public function __construct(PackInterface $pack, ParserInterface $parser, PromiseTransferInterface $transfer)
     {
         $this->pack = $pack;
         $this->parser = $parser;
         $this->transfer = $transfer;
+
+        if ($pack->getHeaderByKey(PROTO_RESERVED_KEY) === ConnectionInterface::PROTO_EXCEPTION) {
+            $this->isException = true;
+
+            list($class, $message, $code) = $this->pack->getData();
+            $this->exception = class_exists($class) ? new $class($message, $code) : new \Exception($message, $code);
+        }
     }
 
     public function getPack(): PackInterface
@@ -41,7 +52,12 @@ class Data implements DataInterface
 
     public function getData()
     {
-        return $this->pack->getData();
+        return $this->isException ? null : $this->pack->getData();
+    }
+
+    public function getException(): \Throwable
+    {
+        return $this->exception;
     }
 
     public function isWaitForResponse(): bool
@@ -49,27 +65,38 @@ class Data implements DataInterface
         return $this->parser->isWaitForResponse();
     }
 
+    public function isResponseSent(): bool
+    {
+        return $this->isResponseSent;
+    }
+
+    public function isException(): bool
+    {
+        return $this->isException;
+    }
+
     public function response($data, callable $onDelivery = null): bool
     {
         if ($this->isResponseSent)
             return false;
 
-        if (!$data instanceof PackInterface) {
-
-            // Security (Remove traces from exceptions)
-            if ($data instanceof \Throwable)
-                $data = new ProtoException(get_class($data), $data->getMessage(), $data->getCode());
-
-            $data = (new Pack())->setData($data);
-        }
+        if (!$data instanceof PackInterface)
+            $data = self::data2pack($data);
 
         $this->transfer->response($data, $this->parser->getId(), $onDelivery);
         $this->isResponseSent = true;
         return true;
     }
 
-    public function isResponseSent(): bool
+    public static function data2pack($data): PackInterface
     {
-        return $this->isResponseSent;
+        if ($data instanceof \Throwable)
+            return (new Pack())
+                ->setHeaderByKey(PROTO_RESERVED_KEY, ConnectionInterface::PROTO_EXCEPTION)
+                ->setData([get_class($data), $data->getMessage(), $data->getCode()]);
+        else
+            return (new Pack())
+                ->setHeaderByKey(PROTO_RESERVED_KEY, ConnectionInterface::PROTO_DATA)
+                ->setData($data);
     }
 }

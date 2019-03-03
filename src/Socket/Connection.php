@@ -68,16 +68,11 @@ class Connection extends EventEmitter implements ConnectionInterface
 
     public function send($data, callable $onResponse = null, callable $onDelivery = null)
     {
-        if (!$data instanceof PackInterface) {
+        if (!$data instanceof PackInterface)
+            $data = Data::data2pack($data);
+        else
+            $data->setHeaderByKey(PROTO_RESERVED_KEY, self::PROTO_DATA);
 
-            // Security (Remove traces from exceptions)
-            if ($data instanceof \Throwable)
-                $data = new ProtoException(get_class($data), $data->getMessage(), $data->getCode());
-
-            $data = (new Pack())->setData($data);
-        }
-
-        $data->setHeaderByKey(1, self::PROTO_DATA);
         $this->qSend($data, $onResponse, $onDelivery);
     }
 
@@ -85,7 +80,7 @@ class Connection extends EventEmitter implements ConnectionInterface
     {
         $deferred = new Deferred();
 
-        $pack = (new Pack())->setHeaderByKey(1, self::PROTO_RPC)->setData([$call, $params]);
+        $pack = (new Pack())->setHeaderByKey(PROTO_RESERVED_KEY, self::PROTO_RPC)->setData([$call, $params]);
         $this->qSend($pack, function (PackInterface $pack) use ($deferred) {
             $return = $pack->getData();
 
@@ -100,7 +95,7 @@ class Connection extends EventEmitter implements ConnectionInterface
 
     public function broadcast(PackInterface $pack, callable $onResponse = null, callable $onDelivery = null)
     {
-        $pack->setHeaderByKey(1, self::PROTO_BROADCAST);
+        $pack->setHeaderByKey(PROTO_RESERVED_KEY, self::PROTO_BROADCAST);
         $this->qSend($pack, $onResponse, $onDelivery);
     }
 
@@ -158,7 +153,7 @@ class Connection extends EventEmitter implements ConnectionInterface
         $this->transfer->on('data', function (PackInterface $pack, ParserInterface $parser) {
             $data = new Data($pack, $parser, $this->transfer);
 
-            switch ($pack->getHeaderByKey(1)) {
+            switch ($pack->getHeaderByKey(PROTO_RESERVED_KEY)) {
                 case self::PROTO_DATA:
                     $this->emit('data', [$data]);
                     return;
