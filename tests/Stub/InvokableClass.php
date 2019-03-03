@@ -24,6 +24,15 @@ class InvokableClass
         return $number1 * $number2;
     }
 
+    /**
+     * @RPC
+     * @throws \Exception
+     */
+    public function exception()
+    {
+        throw new \Exception("Exception Message", 200);
+    }
+
     public function promiseResolve(int $number1, int $number2): Promise
     {
         $deferred = new Deferred();

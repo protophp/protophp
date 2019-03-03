@@ -84,9 +84,10 @@ class Connection extends EventEmitter implements ConnectionInterface
         $this->qSend($pack, function (PackInterface $pack) use ($deferred) {
             $return = $pack->getData();
 
-            if ($return instanceof ProtoException)
-                $deferred->reject($return);
-            else
+            if ($pack->getHeaderByKey(PROTO_RESERVED_KEY, ConnectionInterface::PROTO_EXCEPTION)) {
+                list($class, $message, $code) = $pack->getData();
+                $deferred->reject(class_exists($class) ? new $class($message, $code) : new \Exception($message, $code));
+            } else
                 $deferred->resolve($return);
         });
 
