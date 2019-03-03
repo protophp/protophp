@@ -16,7 +16,7 @@ interface ConnectorInterface extends EventEmitterInterface, ProtoOpt
      * @param string $uri
      * @param SessionManagerInterface $sessionManager
      * @param string|null $sessionKey
-     * @throws SessionException|\Exception
+     * @throws SessionException
      */
     public function __construct(string $uri, SessionManagerInterface $sessionManager, string $sessionKey = null);
 

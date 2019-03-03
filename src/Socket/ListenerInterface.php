@@ -13,7 +13,6 @@ interface ListenerInterface extends EventEmitterInterface, ProtoOpt
      * ListenerInterface constructor.
      * @param $uri
      * @param SessionManagerInterface $sessionManager
-     * @throws \Exception
      */
     public function __construct($uri, SessionManagerInterface $sessionManager);
 

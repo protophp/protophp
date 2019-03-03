@@ -32,7 +32,7 @@ class Proto implements ProtoInterface
     public function __construct()
     {
         if (!isset(self::$loop))
-            throw new \Exception("ProtoPHP doesn't set up yet!");
+            return null;
 
         $this->overwriteSessionManager = self::$sessionManager;
     }
@@ -69,14 +69,16 @@ class Proto implements ProtoInterface
 
     public function connect(): Connector
     {
-        if (!isset($this->uri))
-            throw new \Exception("The uri is not set!");
-
-        $connector =
-            (new Connector($this->uri, $this->overwriteSessionManager, $this->sessionKey))
-                ->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, true)
-                ->setOpt(ProtoOpt::MAP_INVOKE, [])
-                ->connect();
+        try {
+            $connector =
+                (new Connector($this->uri, $this->overwriteSessionManager, $this->sessionKey))
+                    ->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, true)
+                    ->setOpt(ProtoOpt::MAP_INVOKE, [])
+                    ->connect();
+        } catch (Session\Exception\SessionException $e) {
+            // TODO: Log Error
+            return null;
+        }
 
         if (isset($this->name))
             self::$connectors[$this->name] = $connector;
@@ -86,9 +88,6 @@ class Proto implements ProtoInterface
 
     public function listen(): Listener
     {
-        if (!isset($this->uri))
-            throw new \Exception("The uri is not set!");
-
         $listener =
             (new Listener($this->uri, $this->overwriteSessionManager))
                 ->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, true)
@@ -103,7 +102,7 @@ class Proto implements ProtoInterface
     public static function getConnector($name): Connector
     {
         if (!isset(self::$connectors[$name]))
-            throw new \Exception("Unable to found '$name' connector!");
+            return null;
 
         return self::$connectors[$name];
     }
@@ -111,7 +110,7 @@ class Proto implements ProtoInterface
     public static function getListener($name): Listener
     {
         if (!isset(self::$listeners[$name]))
-            throw new \Exception("Unable to found '$name' listener!");
+            return null;
 
         return self::$listeners[$name];
     }
@@ -119,7 +118,7 @@ class Proto implements ProtoInterface
     public static function getLoop(): LoopInterface
     {
         if (!isset(self::$loop))
-            throw new \Exception("ProtoPHP doesn't set up yet!");
+            return null;
 
         return self::$loop;
     }
@@ -127,7 +126,7 @@ class Proto implements ProtoInterface
     public static function getSessionManager(): SessionManagerInterface
     {
         if (!isset(self::$sessionManager))
-            throw new \Exception("ProtoPHP doesn't set up yet!");
+            return null;
 
         return self::$sessionManager;
     }
