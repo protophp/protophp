@@ -191,7 +191,7 @@ class Connection extends EventEmitter implements ConnectionInterface
                     $params = $parser->getParams();
 
                     // Call
-                    isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}:{$this->remoteAddress}] The new invoke received. Call:$call, ParamLength:" . strlen(implode($params)));
+                    isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}:{$this->remoteAddress}] The new invoke received. ($call)");
                     try {
                         $result = $call(...$params);
                     } catch (\Throwable $e) {
