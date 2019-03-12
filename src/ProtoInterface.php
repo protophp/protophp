@@ -5,6 +5,7 @@ namespace Proto;
 use Proto\Session\SessionManagerInterface;
 use Proto\Socket\Connector;
 use Proto\Socket\Listener;
+use Psr\Log\LoggerInterface;
 use React\EventLoop\LoopInterface;
 
 interface ProtoInterface
@@ -12,6 +13,8 @@ interface ProtoInterface
     public function uri(string $uri): ProtoInterface;
 
     public function name($name): ProtoInterface;
+
+    public function logger(LoggerInterface $logger): ProtoInterface;
 
     public function sessionKey(string $sessionKey): ProtoInterface;
 
