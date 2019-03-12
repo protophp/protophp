@@ -13,7 +13,7 @@
     "opt/opt": "^1.0",
     "protophp/pack": "^0.3",
     "protophp/session": "^1.0",
-    "protophp/promise-transfer": "^0.1",
+    "protophp/promise-transfer": "dev-master",
     "react/socket": "^1.0",
     "monolog/monolog": "^1.0",
     "evenement/evenement": "^3.0",
