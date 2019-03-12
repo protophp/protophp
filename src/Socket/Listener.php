@@ -59,29 +59,32 @@ class Listener extends EventEmitter implements ListenerInterface
         isset($this->logger) && $this->logger->info("[Listener#{$this->proto->name}] Listening on '{$this->proto->uri}'");
         $this->server = new Server($this->proto->uri, Proto::getLoop(), []);
         $this->server->on('connection', function (ConnectionInterface $conn) {
-            isset($this->logger) && $this->logger->info("[Listener#{$this->proto->name}] New connection from '{$conn->getRemoteAddress()}'");
 
             $transfer = new PromiseTransfer($conn, $this->sessionManager);
             $transfer->init();
 
-            $transfer->on('established', function (PromiseTransferInterface $transfer, SessionInterface $session) {
+            $transfer->on('established', function (PromiseTransferInterface $transfer, SessionInterface $session) use ($conn) {
 
                 if (!$session->is('CONNECTION')) {
 
+                    isset($this->logger) && $this->logger->info("[Listener#{$this->proto->name}] New connection from '{$conn->getRemoteAddress()}'.");
+
                     // Initial the ProtoConnection
-                    $conn = new Connection(null, $this, $this->proto);
+                    $connection = new Connection(null, $this, $this->proto);
 
                     // Emit the connection
-                    $this->emit('connection', [$conn]);
+                    $this->emit('connection', [$connection]);
 
                     // Add to the session
-                    $session->set('CONNECTION', $conn);
+                    $session->set('CONNECTION', $connection);
 
-                } else
-                    $conn = $session->get('CONNECTION');
+                } else {
+                    isset($this->logger) && $this->logger->info("[Listener#{$this->proto->name}] Connection recovered from '{$conn->getRemoteAddress()}'.");
+                    $connection = $session->get('CONNECTION');
+                }
 
                 // Setup the connection in new transfer
-                $conn->setup($transfer, $session, $this);
+                $connection->setup($transfer, $session, $this);
 
             });
 
