@@ -97,7 +97,7 @@ class Connection extends EventEmitter implements ConnectionInterface
         $pack = (new Pack())->setHeaderByKey(PROTO_RESERVED_KEY, self::PROTO_RPC)->setData([$call, $params]);
         $this->qSend($pack, function (PackInterface $pack) use ($deferred, $call) {
 
-            isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}:{$this->remoteAddress}] Invoke responded. call: $call");
+            isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}:{$this->remoteAddress}] The invoke ($call) responded.");
             if ($pack->getHeaderByKey(PROTO_RESERVED_KEY) === ConnectionInterface::PROTO_EXCEPTION) {
                 list($class, $message, $code) = $pack->getData();
                 $deferred->reject(class_exists($class) ? new $class($message, $code) : new \Exception($message, $code));
@@ -106,7 +106,7 @@ class Connection extends EventEmitter implements ConnectionInterface
 
         });
 
-        isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}:{$this->remoteAddress}] Send invoke. Call:$call, ParamLength:" . strlen(implode($params)));
+        isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}:{$this->remoteAddress}] The invoke sent. ($call)");
         return $deferred->promise();
     }
 
