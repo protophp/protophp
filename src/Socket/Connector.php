@@ -65,7 +65,8 @@ class Connector extends EventEmitter implements ConnectorInterface
         // Defaults options
         $this
             ->setOpt(self::DISALLOW_DIRECT_INVOKE, true)
-            ->setOpt(self::MAP_INVOKE, []);
+            ->setOpt(self::MAP_INVOKE, [])
+            ->setOpt(self::RETRY_CONNECTION, 3);
 
         $this->conn = new Connection($this, null, $proto);
         $this->broadcast = new BroadcastReceiver($this->conn);
@@ -119,12 +120,19 @@ class Connector extends EventEmitter implements ConnectorInterface
                         $this->conn->setup($transfer, $session, $this);
                     }
 
-                    isset($this->logger) && $this->logger->info("[Connector#{$this->proto->name}] Successfully connected to '{$this->proto->uri}'.");
+                    isset($this->logger) && $this->logger->info("[Connector#{$this->proto->name}:{$this->proto->uri}] Successfully connected.");
                 });
 
                 $conn->on('close', function () {
-                    isset($this->logger) && $this->logger->info("[Connector#{$this->proto->name}] Connection closed.");
-                    $this->connect();       // reconnect...
+                    isset($this->logger) && $this->logger->info("[Connector#{$this->proto->name}:{$this->proto->uri}] Connection closed.");
+
+                    if (($sec = $this->getOpt(self::RETRY_CONNECTION)) !== false) {
+
+                        isset($this->logger) && $this->logger->info("[Connector#{$this->proto->name}:{$this->proto->uri}] Retrying after $sec sec...");
+                        Proto::getLoop()->addTimer($sec, function () {
+                            $this->connect();
+                        });
+                    }
                 });
 
                 $conn->on('error', function (\Exception $e) {
@@ -137,6 +145,14 @@ class Connector extends EventEmitter implements ConnectorInterface
                 isset($this->logger) && $this->logger->error("[Connector#{$this->proto->name}] {$e->getMessage()}");
                 $this->emit('error', [$e]);
                 $this->connecting = false;
+
+                if (($sec = $this->getOpt(self::RETRY_CONNECTION)) !== false) {
+
+                    isset($this->logger) && $this->logger->info("[Connector#{$this->proto->name}:{$this->proto->uri}] Retrying after $sec sec...");
+                    Proto::getLoop()->addTimer($sec, function () {
+                        $this->connect();
+                    });
+                }
             });
 
         return $this;
