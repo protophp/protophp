@@ -11,9 +11,10 @@ use Proto\Pack\Pack;
 use Proto\Pack\PackInterface;
 use Proto\PromiseTransfer\ParserInterface;
 use Proto\PromiseTransfer\PromiseTransferInterface;
-use Proto\ProtoException;
+use Proto\Proto;
 use Proto\ProtoOpt;
 use Proto\Session\SessionInterface;
+use Psr\Log\LoggerInterface;
 use React\Promise\Deferred;
 use React\Promise\Promise;
 
@@ -49,11 +50,21 @@ class Connection extends EventEmitter implements ConnectionInterface
      */
     private $listener;
 
+    /**
+     * @var Proto
+     */
+    private $proto;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
     private $isListenerConn;
     private $id = null;
     private $hash;
 
-    public function __construct(ConnectorInterface $connector = null, ListenerInterface $listener = null)
+    public function __construct(ConnectorInterface $connector = null, ListenerInterface $listener = null, Proto $proto = null)
     {
         $this->hash = \spl_object_hash($this);
         if (PHP_VERSION_ID >= 70200)
@@ -61,6 +72,8 @@ class Connection extends EventEmitter implements ConnectionInterface
 
         $this->queue = new \SplQueue();
 
+        $this->proto = $proto;
+        $this->logger = $proto->logger;
         $this->connector = $connector;
         $this->listener = $listener;
         $this->isListenerConn = ($listener !== null);
@@ -80,9 +93,11 @@ class Connection extends EventEmitter implements ConnectionInterface
     {
         $deferred = new Deferred();
 
+        isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}] The RPC call", [$call, $params]);
         $pack = (new Pack())->setHeaderByKey(PROTO_RESERVED_KEY, self::PROTO_RPC)->setData([$call, $params]);
-        $this->qSend($pack, function (PackInterface $pack) use ($deferred) {
+        $this->qSend($pack, function (PackInterface $pack) use ($deferred, $call) {
 
+            isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}] The RPC response", [$call]);
             if ($pack->getHeaderByKey(PROTO_RESERVED_KEY) === ConnectionInterface::PROTO_EXCEPTION) {
                 list($class, $message, $code) = $pack->getData();
                 $deferred->reject(class_exists($class) ? new $class($message, $code) : new \Exception($message, $code));
@@ -138,6 +153,7 @@ class Connection extends EventEmitter implements ConnectionInterface
         while (!$this->queue->isEmpty())
             $this->transfer->send(...$this->queue->dequeue());
 
+        isset($this->logger) && $this->logger->info("[Connection#{$this->proto->name}] The connection setup completed.", []);
         return $this;
     }
 
@@ -223,6 +239,7 @@ class Connection extends EventEmitter implements ConnectionInterface
         });
 
         $this->transfer->on('close', function () {
+            isset($this->logger) && $this->logger->error("[Connection#{$this->proto->name}] The transfer closed!", []);
             $this->transfer = null;
         });
     }

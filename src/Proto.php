@@ -89,7 +89,7 @@ class Proto implements ProtoInterface
     public function listen(): Listener
     {
         $listener =
-            (new Listener($this->uri, $this->overwriteSessionManager))
+            (new Listener($this))
                 ->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, true)
                 ->setOpt(ProtoOpt::MAP_INVOKE, []);
 

@@ -4,7 +4,6 @@ namespace Proto\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Proto\Proto;
-use Proto\ProtoException;
 use Proto\ProtoOpt;
 use Proto\Session\SessionManager;
 use React\EventLoop\Factory;
@@ -31,7 +30,7 @@ class InvokeTest extends TestCase
                 $this->assertEquals(50, $data);
                 Proto::getLoop()->stop();
             })
-            ->otherwise(function (ProtoException $e) {
+            ->otherwise(function (\Throwable $e) {
                 var_dump($e);
                 die;
             });

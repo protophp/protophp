@@ -11,6 +11,7 @@ use Proto\PromiseTransfer\PromiseTransferInterface;
 use Proto\Proto;
 use Proto\Session\SessionInterface;
 use Proto\Session\SessionManagerInterface;
+use Psr\Log\LoggerInterface;
 use React\Socket\ConnectionInterface;
 use React\Socket\Server;
 
@@ -33,9 +34,21 @@ class Listener extends EventEmitter implements ListenerInterface
      */
     private $broadcast;
 
-    public function __construct($uri, SessionManagerInterface $sessionManager)
+    /**
+     * @var Proto
+     */
+    private $proto;
+
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(Proto $proto)
     {
-        $this->sessionManager = $sessionManager;
+        $this->proto = $proto;
+        $this->logger = $proto->logger;
+        $this->sessionManager = isset($proto->overwriteSessionManager) ? $proto->overwriteSessionManager : Proto::getSessionManager();
         $this->broadcast = new Broadcast();
 
         // Defaults options
@@ -43,8 +56,10 @@ class Listener extends EventEmitter implements ListenerInterface
             ->setOpt(self::DISALLOW_DIRECT_INVOKE, true)
             ->setOpt(self::MAP_INVOKE, []);
 
-        $this->server = new Server($uri, Proto::getLoop(), []);
+        isset($this->logger) && $this->logger->info("[Listener#{$this->proto->name}] Listening on '{$this->proto->uri}'");
+        $this->server = new Server($this->proto->uri, Proto::getLoop(), []);
         $this->server->on('connection', function (ConnectionInterface $conn) {
+            isset($this->logger) && $this->logger->info("[Listener#{$this->proto->name}] New connection from '{$conn->getRemoteAddress()}'");
 
             $transfer = new PromiseTransfer($conn, $this->sessionManager);
             $transfer->init();
@@ -54,7 +69,7 @@ class Listener extends EventEmitter implements ListenerInterface
                 if (!$session->is('CONNECTION')) {
 
                     // Initial the ProtoConnection
-                    $conn = new Connection(null, $this);
+                    $conn = new Connection(null, $this, $this->proto);
 
                     // Emit the connection
                     $this->emit('connection', [$conn]);
@@ -70,6 +85,10 @@ class Listener extends EventEmitter implements ListenerInterface
 
             });
 
+        });
+
+        $this->server->on('error', function (\Throwable $e) {
+            isset($this->logger) && $this->logger->emergency("[Listener#{$this->proto->name}] {$e->getMessage()}");
         });
     }
 

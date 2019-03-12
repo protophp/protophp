@@ -4,17 +4,16 @@ namespace Proto\Socket;
 
 use Evenement\EventEmitterInterface;
 use Proto\Broadcast\BroadcastInterface;
+use Proto\Proto;
 use Proto\ProtoOpt;
-use Proto\Session\SessionManagerInterface;
 
 interface ListenerInterface extends EventEmitterInterface, ProtoOpt
 {
     /**
      * ListenerInterface constructor.
-     * @param $uri
-     * @param SessionManagerInterface $sessionManager
+     * @param Proto $proto
      */
-    public function __construct($uri, SessionManagerInterface $sessionManager);
+    public function __construct(Proto $proto);
 
     public function broadcast(): BroadcastInterface;
 }
