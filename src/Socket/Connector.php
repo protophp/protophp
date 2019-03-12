@@ -11,6 +11,7 @@ use Proto\PromiseTransfer\PromiseTransferInterface;
 use Proto\Proto;
 use Proto\Session\SessionInterface;
 use Proto\Session\SessionManagerInterface;
+use Psr\Log\LoggerInterface;
 use React\Promise\Promise;
 use React\Socket\ConnectionInterface;
 
@@ -39,17 +40,27 @@ class Connector extends EventEmitter implements ConnectorInterface
     private $conn;
 
     /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    /**
      * @var BroadcastReceiver
      */
     private $broadcast;
-    private $uri;
+
+    /**
+     * @var Proto
+     */
+    private $proto;
     private $connecting = false;
 
-    public function __construct(string $uri, SessionManagerInterface $sessionManager, string $sessionKey = null)
+    public function __construct(Proto $proto)
     {
-        $this->uri = $uri;
-        $this->sessionManager = $sessionManager;
-        $this->session = $this->sessionManager->start($sessionKey);
+        $this->proto = $proto;
+        $this->logger = $proto->logger;
+        $this->sessionManager = isset($proto->overwriteSessionManager) ? $proto->overwriteSessionManager : Proto::getSessionManager();
+        $this->session = $this->sessionManager->start($proto->sessionKey);
 
         // Defaults options
         $this
@@ -82,8 +93,9 @@ class Connector extends EventEmitter implements ConnectorInterface
         if ($this->conn->isConnected() || $this->connecting)
             return $this;
 
+        isset($this->logger) && $this->logger->info("[Connector#{$this->proto->name}] Trying to connect to '{$this->proto->uri}'.");
         $this->connecting = true;
-        $this->connector->connect($this->uri)
+        $this->connector->connect($this->proto->uri)
             ->then(function (ConnectionInterface $conn) {
                 $this->connecting = false;
 
@@ -107,20 +119,24 @@ class Connector extends EventEmitter implements ConnectorInterface
                         $this->conn->setup($transfer, $session, $this);
                     }
 
+                    isset($this->logger) && $this->logger->info("[Connector#{$this->proto->name}] Successfully connected to '{$this->proto->uri}'.");
                 });
 
                 $conn->on('close', function () {
+                    isset($this->logger) && $this->logger->info("[Connector#{$this->proto->name}] Connection closed.");
                     $this->connect();       // reconnect...
                 });
 
                 $conn->on('error', function (\Exception $e) {
+                    isset($this->logger) && $this->logger->error("[Connector#{$this->proto->name}] {$e->getMessage()}");
                     $this->emit('error', [$e]);
                 });
 
             })
             ->otherwise(function (\Exception $e) {
-                $this->connecting = false;
+                isset($this->logger) && $this->logger->error("[Connector#{$this->proto->name}] {$e->getMessage()}");
                 $this->emit('error', [$e]);
+                $this->connecting = false;
             });
 
         return $this;

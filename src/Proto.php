@@ -23,11 +23,11 @@ class Proto implements ProtoInterface
     private static $connectors = [];
     private static $listeners = [];
 
-    private $uri = null;
-    private $name = null;
-    private $logger = null;
-    private $sessionKey = null;
-    private $overwriteSessionManager = null;
+    public $uri = null;
+    public $name = null;
+    public $logger = null;
+    public $sessionKey = null;
+    public $overwriteSessionManager = null;
 
     public function __construct()
     {
@@ -71,7 +71,7 @@ class Proto implements ProtoInterface
     {
         try {
             $connector =
-                (new Connector($this->uri, $this->overwriteSessionManager, $this->sessionKey))
+                (new Connector($this))
                     ->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, true)
                     ->setOpt(ProtoOpt::MAP_INVOKE, [])
                     ->connect();

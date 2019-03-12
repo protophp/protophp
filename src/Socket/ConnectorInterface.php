@@ -4,21 +4,19 @@ namespace Proto\Socket;
 
 use Evenement\EventEmitterInterface;
 use Proto\Broadcast\BroadcastReceiverInterface;
+use Proto\Proto;
 use Proto\ProtoOpt;
 use Proto\Session\Exception\SessionException;
-use Proto\Session\SessionManagerInterface;
 use React\Promise\Promise;
 
 interface ConnectorInterface extends EventEmitterInterface, ProtoOpt
 {
     /**
      * ConnectorInterface constructor.
-     * @param string $uri
-     * @param SessionManagerInterface $sessionManager
-     * @param string|null $sessionKey
+     * @param Proto $proto
      * @throws SessionException
      */
-    public function __construct(string $uri, SessionManagerInterface $sessionManager, string $sessionKey = null);
+    public function __construct(Proto $proto);
 
     /**
      * @param $data
