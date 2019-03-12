@@ -61,6 +61,7 @@ class Connection extends EventEmitter implements ConnectionInterface
     private $logger;
 
     private $isListenerConn;
+    private $remoteAddress = null;
     private $id = null;
     private $hash;
 
@@ -93,11 +94,10 @@ class Connection extends EventEmitter implements ConnectionInterface
     {
         $deferred = new Deferred();
 
-        isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}] The RPC call", [$call, $params]);
         $pack = (new Pack())->setHeaderByKey(PROTO_RESERVED_KEY, self::PROTO_RPC)->setData([$call, $params]);
         $this->qSend($pack, function (PackInterface $pack) use ($deferred, $call) {
 
-            isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}] The RPC response", [$call]);
+            isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}:{$this->remoteAddress}] Invoke responded. call: $call");
             if ($pack->getHeaderByKey(PROTO_RESERVED_KEY) === ConnectionInterface::PROTO_EXCEPTION) {
                 list($class, $message, $code) = $pack->getData();
                 $deferred->reject(class_exists($class) ? new $class($message, $code) : new \Exception($message, $code));
@@ -106,6 +106,7 @@ class Connection extends EventEmitter implements ConnectionInterface
 
         });
 
+        isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}:{$this->remoteAddress}] Send invoke. Call:$call, ParamLength:" . strlen(implode($params)));
         return $deferred->promise();
     }
 
@@ -142,6 +143,7 @@ class Connection extends EventEmitter implements ConnectionInterface
 
     public function setup(PromiseTransferInterface $transfer, SessionInterface $session, ProtoOpt $opt): ConnectionInterface
     {
+        $this->remoteAddress = $transfer->getConn()->getRemoteAddress();
         $this->transfer = $transfer;
         $this->session = $session;
         $this->opt = $opt;
@@ -153,7 +155,6 @@ class Connection extends EventEmitter implements ConnectionInterface
         while (!$this->queue->isEmpty())
             $this->transfer->send(...$this->queue->dequeue());
 
-        isset($this->logger) && $this->logger->info("[Connection#{$this->proto->name}] The connection setup completed.", []);
         return $this;
     }
 
@@ -182,6 +183,7 @@ class Connection extends EventEmitter implements ConnectionInterface
                     } catch (InvokeException $e) {
                         // Exception response
                         $data->response($e);
+                        isset($this->logger) && $this->logger->error("[Connection#{$this->proto->name}:{$this->remoteAddress}] Something wrong in incoming invoke. [InvokeException#{$e->getCode()}] {$e->getMessage()}");
                         return;
                     }
 
@@ -189,6 +191,7 @@ class Connection extends EventEmitter implements ConnectionInterface
                     $params = $parser->getParams();
 
                     // Call
+                    isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}:{$this->remoteAddress}] The new invoke received. Call:$call, ParamLength:" . strlen(implode($params)));
                     try {
                         $result = $call(...$params);
                     } catch (\Throwable $e) {
@@ -220,6 +223,7 @@ class Connection extends EventEmitter implements ConnectionInterface
 
                 case self::PROTO_BROADCAST:
 
+                    isset($this->logger) && $this->logger->debug("[Connection#{$this->proto->name}:{$this->remoteAddress}] New broadcast received.");
                     if ($this->isListenerConn) {
                         /** @var Broadcast $broadcast */
                         $broadcast = $this->listener->broadcast();
@@ -239,7 +243,7 @@ class Connection extends EventEmitter implements ConnectionInterface
         });
 
         $this->transfer->on('close', function () {
-            isset($this->logger) && $this->logger->error("[Connection#{$this->proto->name}] The transfer closed!", []);
+            isset($this->logger) && $this->logger->error("[Connection#{$this->proto->name}:{$this->remoteAddress}] The transfer closed!", []);
             $this->transfer = null;
         });
     }
