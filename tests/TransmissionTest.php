@@ -2,6 +2,8 @@
 
 namespace Proto\Tests;
 
+use Monolog\Handler\ErrorLogHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Proto\Proto;
 use Proto\Socket\DataInterface;
@@ -21,6 +23,7 @@ class TransmissionTest extends TestCase
 
         (new Proto())
             ->uri("127.0.0.1:$port")
+            ->logger(new Logger('TestListener', [new ErrorLogHandler()]))
             ->listen()
             ->on('connection', function (ConnectionInterface $conn) {
 
@@ -41,6 +44,7 @@ class TransmissionTest extends TestCase
 
         (new Proto())
             ->uri("127.0.0.1:$port")
+            ->logger(new Logger('TestConnector', [new ErrorLogHandler()]))
             ->connect()
             ->on('connection', function (ConnectionInterface $conn) {
 

@@ -2,6 +2,8 @@
 
 namespace Proto\Tests;
 
+use Monolog\Handler\ErrorLogHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Proto\Proto;
 use Proto\ProtoOpt;
@@ -19,11 +21,13 @@ class InvokeTest extends TestCase
 
         (new Proto())
             ->uri("127.0.0.1:$port")
+            ->logger(new Logger('TestListener', [new ErrorLogHandler()]))
             ->listen()
             ->setOpt(ProtoOpt::DISALLOW_DIRECT_INVOKE, false);
 
         (new Proto())
             ->uri("127.0.0.1:$port")
+            ->logger(new Logger('TestConnector', [new ErrorLogHandler()]))
             ->connect()
             ->invoke('\Proto\Tests\Stub\InvokableClass::multiplication', [5, 10])
             ->then(function ($data) {

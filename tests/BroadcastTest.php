@@ -2,6 +2,8 @@
 
 namespace Proto\Tests;
 
+use Monolog\Handler\ErrorLogHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
 use Proto\Proto;
 use Proto\Session\SessionManager;
@@ -20,10 +22,12 @@ class BroadcastTest extends TestCase
         $listener =
             (new Proto())
                 ->uri("127.0.0.1:$port")
+                ->logger(new Logger('TestListener', [new ErrorLogHandler()]))
                 ->listen();
 
         (new Proto())
             ->uri("127.0.0.1:$port")
+            ->logger(new Logger('TestConnector', [new ErrorLogHandler()]))
             ->connect()
             ->on('connection', function (ConnectionInterface $conn) {
                 $conn->getConnector()->broadcast()->on('SampleBroadcast', function ($data) {

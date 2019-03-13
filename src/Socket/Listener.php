@@ -11,13 +11,16 @@ use Proto\PromiseTransfer\PromiseTransferInterface;
 use Proto\Proto;
 use Proto\Session\SessionInterface;
 use Proto\Session\SessionManagerInterface;
-use Psr\Log\LoggerInterface;
+use Psr\Log\LoggerAwareTrait;
+use Psr\Log\LoggerTrait;
 use React\Socket\ConnectionInterface;
 use React\Socket\Server;
 
 class Listener extends EventEmitter implements ListenerInterface
 {
     use OptTrait;
+    use LoggerTrait;
+    use LoggerAwareTrait;
 
     /**
      * @var SessionManagerInterface
@@ -39,11 +42,6 @@ class Listener extends EventEmitter implements ListenerInterface
      */
     private $proto;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
-
     public function __construct(Proto $proto)
     {
         $this->proto = $proto;
@@ -56,7 +54,7 @@ class Listener extends EventEmitter implements ListenerInterface
             ->setOpt(self::DISALLOW_DIRECT_INVOKE, true)
             ->setOpt(self::MAP_INVOKE, []);
 
-        isset($this->logger) && $this->logger->info("[Listener#{$this->proto->name}] Listening on '{$this->proto->uri}'");
+        $this->info("Listening on '{$this->proto->uri}'.");
         $this->server = new Server($this->proto->uri, Proto::getLoop(), []);
         $this->server->on('connection', function (ConnectionInterface $conn) {
 
@@ -67,10 +65,11 @@ class Listener extends EventEmitter implements ListenerInterface
 
                 if (!$session->is('CONNECTION')) {
 
-                    isset($this->logger) && $this->logger->info("[Listener#{$this->proto->name}] New connection from '{$conn->getRemoteAddress()}'.");
+                    $this->info("New connection from '{$conn->getRemoteAddress()}' established.");
 
                     // Initial the ProtoConnection
-                    $connection = new Connection(null, $this, $this->proto);
+                    $connection = new Connection(null, $this);
+                    $connection->setLogger($this->logger);
 
                     // Emit the connection
                     $this->emit('connection', [$connection]);
@@ -79,8 +78,9 @@ class Listener extends EventEmitter implements ListenerInterface
                     $session->set('CONNECTION', $connection);
 
                 } else {
-                    isset($this->logger) && $this->logger->info("[Listener#{$this->proto->name}] Connection recovered from '{$conn->getRemoteAddress()}'.");
+                    $this->info("The connection recovered from '{$conn->getRemoteAddress()}'.");
                     $connection = $session->get('CONNECTION');
+                    $connection->setLogger($this->logger);
                 }
 
                 // Setup the connection in new transfer
@@ -91,7 +91,7 @@ class Listener extends EventEmitter implements ListenerInterface
         });
 
         $this->server->on('error', function (\Throwable $e) {
-            isset($this->logger) && $this->logger->emergency("[Listener#{$this->proto->name}] {$e->getMessage()}");
+            $this->emergency($e->getMessage());
         });
     }
 
@@ -100,5 +100,8 @@ class Listener extends EventEmitter implements ListenerInterface
         return $this->broadcast;
     }
 
-
+    public function log($level, $message, array $context = array())
+    {
+        isset($this->logger) && $this->logger->log($level, $message, $context);
+    }
 }
