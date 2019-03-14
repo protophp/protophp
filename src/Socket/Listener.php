@@ -88,6 +88,14 @@ class Listener extends EventEmitter implements ListenerInterface
 
             });
 
+            $conn->on('error', function (\Exception $e) use ($conn) {
+                $this->error("[{$conn->getRemoteAddress()}] {$e->getMessage()}");
+            });
+
+            $conn->on('close', function () use ($conn) {
+                $this->error("[{$conn->getRemoteAddress()}] The connection closed!");
+            });
+
         });
 
         $this->server->on('error', function (\Throwable $e) {
