@@ -67,7 +67,7 @@ class Connector extends EventEmitter implements ConnectorInterface
             ->setOpt(self::RETRY_CONNECTION, 3);
 
         $this->conn = new Connection($this, null);
-        $this->conn->setLogger($this->logger);
+        isset($this->logger) && $this->conn->setLogger($this->logger);
 
         $this->broadcast = new BroadcastReceiver($this->conn);
         $this->connector = new \React\Socket\Connector(Proto::getLoop(), []);

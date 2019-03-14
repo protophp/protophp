@@ -191,6 +191,13 @@ class Connection extends EventEmitter implements ConnectionInterface
                     $this->debug("[{$this->remoteAddress}] New invoke '$call' received.");
                     try {
                         $result = $call(...$params);
+
+                    } catch (\Error $e) {
+                        $class = get_class($e);
+                        $this->emergency("[{$this->remoteAddress}] {$class}#{$e->getCode()}: {$e->getMessage()}");
+                        $data->response(new InvokeException(null, InvokeException::ERR_UNKNOWN));
+                        return;
+
                     } catch (\Throwable $e) {
                         // Exception response
                         $data->response($e);

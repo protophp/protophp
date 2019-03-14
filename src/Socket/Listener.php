@@ -69,7 +69,7 @@ class Listener extends EventEmitter implements ListenerInterface
 
                     // Initial the ProtoConnection
                     $connection = new Connection(null, $this);
-                    $connection->setLogger($this->logger);
+                    isset($this->logger) && $connection->setLogger($this->logger);
 
                     // Emit the connection
                     $this->emit('connection', [$connection]);
